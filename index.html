@@ -304,7 +304,7 @@
         }
 
         .behavior-panel {
-            margin-bottom: 0;
+            margin-bottom: 20px;
         }
 
         .behavior-header {
@@ -842,6 +842,18 @@
 
             <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for preview input</div>
 
+            <div class="stack-panel behavior-panel">
+                <div class="behavior-header">
+                    <div>
+                        <h3 class="stack-title">Behavior Monitor</h3>
+                        <h3 id="behaviorCurrent" class="behavior-current">Standby</h3>
+                    </div>
+                    <button id="clearBehaviorBtn" class="clear-btn">Clear Log</button>
+                </div>
+                <p id="behaviorDetail" class="behavior-detail">Waiting for a mode selection or drive command.</p>
+                <ul id="behaviorLog" class="behavior-log"></ul>
+            </div>
+
             <div class="dashboard-grid">
                 <div class="dashboard-main">
                     <div class="stack-panel subsystem-panel">
@@ -853,18 +865,6 @@
                                 <h2 id="modeName" class="mode-name">Open Hand</h2>
                                 <p id="modeSummary" class="mode-summary" style="display: none;"></p>
                             </div>
-                        </div>
-
-                        <div class="stack-panel behavior-panel">
-                            <div class="behavior-header">
-                                <div>
-                                    <h3 class="stack-title">Behavior Monitor</h3>
-                                    <h3 id="behaviorCurrent" class="behavior-current">Standby</h3>
-                                </div>
-                                <button id="clearBehaviorBtn" class="clear-btn">Clear Log</button>
-                            </div>
-                            <p id="behaviorDetail" class="behavior-detail">Waiting for a mode selection or drive command.</p>
-                            <ul id="behaviorLog" class="behavior-log"></ul>
                         </div>
 
                         <div class="gesture-panel">
