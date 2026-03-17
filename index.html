@@ -3882,8 +3882,7 @@
                 const speedLaneIndex = 2;
                 const threshold = this.emgActivationThreshold;
                 const hysteresis = this.emgDominanceHysteresis;
-                const driveDisplayMax = 72;
-                const speedDisplayMax = 72;
+                let comparableDisplayMax = 72;
                 const modeSpeedCap = (modeKey) => this.modeSpeedCaps[modeKey] ?? this.modeSpeedCaps['power-grasp'];
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -3943,9 +3942,7 @@
                 const yForPercent = (laneIndex, value) => {
                     const laneMax = laneIndex === rawLaneIndex
                         ? 100
-                        : laneIndex === driveLaneIndex
-                            ? driveDisplayMax
-                            : speedDisplayMax;
+                        : comparableDisplayMax;
                     const clamped = Math.max(0, Math.min(laneMax, value));
                     const laneTop = margin.top + (laneHeight * laneIndex);
                     return laneTop + laneHeight - 12 - ((clamped / laneMax) * (laneHeight - 24));
@@ -3998,6 +3995,17 @@
                 const closeDrive = displaySamples.map((sample) => sample.closeDrive);
                 const requestedSpeed = displaySamples.map((sample) => sample.requestedSpeed);
                 const speedCaps = displaySamples.map((sample) => modeSpeedCap(sample.modeKey));
+                const sharedComparablePeak = Math.max(
+                    threshold,
+                    this.emgReleaseThreshold,
+                    ...openDrive,
+                    ...closeDrive,
+                    ...requestedSpeed
+                );
+                comparableDisplayMax = Math.max(
+                    24,
+                    Math.min(100, Math.ceil((sharedComparablePeak * 1.12) / 5) * 5)
+                );
                 const dualActivationStates = displaySamples.map((sample) =>
                     sample.openDrive >= threshold &&
                     sample.closeDrive >= threshold &&
