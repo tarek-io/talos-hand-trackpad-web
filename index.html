@@ -1302,8 +1302,8 @@
                 };
                 this.timelineSamples = [];
                 this.timelineEvents = [];
-                this.timelineMaxSamples = 220;
-                this.timelineMaxEvents = 48;
+                this.timelineMaxSamples = 420;
+                this.timelineMaxEvents = 96;
                 this.isRecording = false;
                 this.recordingStartedAtMs = 0;
                 this.recordedEntries = [];
@@ -3748,6 +3748,7 @@
                 const ctx = this.timelineCtx;
                 const canvas = this.timelineCanvas;
                 const samples = this.timelineSamples;
+                const events = this.timelineEvents;
                 const lanes = [
                     { labelLines: ['EMG 1', 'raw / filtered'], key: 'emg1' },
                     { labelLines: ['EMG 2', 'raw / filtered'], key: 'emg2' },
@@ -3799,7 +3800,26 @@
                     return;
                 }
 
-                const sampleCount = samples.length;
+                const cycleAnchorEvent = [...events].reverse().find((event) =>
+                    event.type === 'mode_switch' && String(event.value || '').toLowerCase() !== 'open-hand'
+                ) || [...events].reverse().find((event) => event.type === 'drive_start');
+                const defaultWindowStart = Math.max(0, samples.length - 160);
+                const displayStartIndex = cycleAnchorEvent
+                    ? Math.max(0, cycleAnchorEvent.sampleIndex - 8)
+                    : defaultWindowStart;
+                const displaySamples = samples.slice(displayStartIndex);
+                const displayEvents = events
+                    .filter((event) => event.sampleIndex >= displayStartIndex)
+                    .map((event) => ({
+                        ...event,
+                        sampleIndex: event.sampleIndex - displayStartIndex
+                    }));
+
+                if (displaySamples.length === 0) {
+                    return;
+                }
+
+                const sampleCount = displaySamples.length;
                 const xForIndex = (index) => margin.left + ((sampleCount <= 1 ? 0 : index / (sampleCount - 1)) * plotWidth);
                 const yForPercent = (laneIndex, value) => {
                     const clamped = Math.max(0, Math.min(100, value));
@@ -3845,14 +3865,14 @@
                     ctx.fillText(label, canvas.width - margin.right - 6, y - 4);
                 };
 
-                const raw1 = samples.map((sample) => (sample.raw1 / 4095) * 100);
-                const raw2 = samples.map((sample) => (sample.raw2 / 4095) * 100);
-                const filtered1 = samples.map((sample) => sample.filtered1);
-                const filtered2 = samples.map((sample) => sample.filtered2);
-                const openDrive = samples.map((sample) => sample.openDrive);
-                const closeDrive = samples.map((sample) => sample.closeDrive);
-                const requestedSpeed = samples.map((sample) => sample.requestedSpeed);
-                const targetSpeed = samples.map((sample) => {
+                const raw1 = displaySamples.map((sample) => (sample.raw1 / 4095) * 100);
+                const raw2 = displaySamples.map((sample) => (sample.raw2 / 4095) * 100);
+                const filtered1 = displaySamples.map((sample) => sample.filtered1);
+                const filtered2 = displaySamples.map((sample) => sample.filtered2);
+                const openDrive = displaySamples.map((sample) => sample.openDrive);
+                const closeDrive = displaySamples.map((sample) => sample.closeDrive);
+                const requestedSpeed = displaySamples.map((sample) => sample.requestedSpeed);
+                const targetSpeed = displaySamples.map((sample) => {
                     const dominantDrive = sample.state === 'open'
                         ? sample.openDrive
                         : sample.state === 'close'
@@ -3864,8 +3884,8 @@
                     const normalizedDrive = ((dominantDrive - threshold) * 100) / Math.max(1, 100 - threshold);
                     return Math.round((normalizedDrive * modeSpeedCap(sample.modeKey)) / 100);
                 });
-                const speedCaps = samples.map((sample) => modeSpeedCap(sample.modeKey));
-                const dualActivationStates = samples.map((sample) =>
+                const speedCaps = displaySamples.map((sample) => modeSpeedCap(sample.modeKey));
+                const dualActivationStates = displaySamples.map((sample) =>
                     sample.openDrive >= threshold &&
                     sample.closeDrive >= threshold &&
                     Math.abs(sample.openDrive - sample.closeDrive) < hysteresis
@@ -3882,9 +3902,9 @@
                         let fill = '';
                         if (dualActivationStates[i]) {
                             fill = 'rgba(180, 83, 9, 0.09)';
-                        } else if (samples[i].state === 'open') {
+                        } else if (displaySamples[i].state === 'open') {
                             fill = 'rgba(59, 130, 246, 0.07)';
-                        } else if (samples[i].state === 'close') {
+                        } else if (displaySamples[i].state === 'close') {
                             fill = 'rgba(16, 185, 129, 0.07)';
                         }
 
@@ -3895,7 +3915,7 @@
                     }
                 }
 
-                this.timelineEvents.forEach((event) => {
+                displayEvents.forEach((event) => {
                     const x = xForIndex(Math.max(0, Math.min(sampleCount - 1, event.sampleIndex)));
                     const shortLabel = {
                         mode_switch: 'mode',
