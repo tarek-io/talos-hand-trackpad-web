@@ -303,6 +303,47 @@
             max-width: 480px;
         }
 
+        .behavior-panel {
+            margin-bottom: 20px;
+        }
+
+        .behavior-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .behavior-current {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 40px);
+            line-height: 0.98;
+            letter-spacing: -0.03em;
+            color: var(--ink);
+        }
+
+        .behavior-detail {
+            margin: 6px 0 14px 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .behavior-log {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .behavior-log li {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
         .canvas-container {
             border: 1px solid var(--border-strong);
             border-radius: var(--radius-lg);
@@ -802,6 +843,18 @@
                 </div>
             </div>
 
+            <div class="stack-panel behavior-panel">
+                <div class="behavior-header">
+                    <div>
+                        <h3 class="stack-title">Behavior Monitor</h3>
+                        <h3 id="behaviorCurrent" class="behavior-current">Standby</h3>
+                    </div>
+                    <button id="clearBehaviorBtn" class="clear-btn">Clear Log</button>
+                </div>
+                <p id="behaviorDetail" class="behavior-detail">Waiting for a mode selection or drive command.</p>
+                <ul id="behaviorLog" class="behavior-log"></ul>
+            </div>
+
             <div class="dashboard-grid">
                 <div class="dashboard-main">
                     <div class="gesture-panel">
@@ -1032,6 +1085,10 @@
                     assist: 0,
                     contacts: 0
                 };
+                this.behaviorLogMax = 18;
+                this.demoControlFrames = 150;
+                this.lastEmgBehaviorKey = '';
+                this.lastTactileBehaviorKey = '';
                 this.modeCatalog = {
                     idle: {
                         name: 'Standby',
@@ -1091,6 +1148,10 @@
                 const clearGestureBtn = document.getElementById('clearGestureBtn');
                 if (clearGestureBtn) {
                     clearGestureBtn.addEventListener('click', () => this.clearGestureLog());
+                }
+                const clearBehaviorBtn = document.getElementById('clearBehaviorBtn');
+                if (clearBehaviorBtn) {
+                    clearBehaviorBtn.addEventListener('click', () => this.clearBehaviorLog());
                 }
                 const clearSerialBtn = document.getElementById('clearSerialBtn');
                 if (clearSerialBtn) {
@@ -1279,45 +1340,130 @@
             }
 
             buildDemoFrames() {
+                const neutralEmg = { open: 0, close: 0, command: 0, speed: 0, state: 'neutral' };
+                const inactiveTactile = { mode: 'inactive', assist: 0, contacts: 0 };
+
                 return [
                     ...this.withTelemetry(
                         this.createSwipeScene(2, 220, 280, 640, 280, 38),
-                        { open: 8, close: 84, command: 76, speed: 82, state: 'close' },
-                        { mode: 'inactive', assist: 0, contacts: 0 }
+                        neutralEmg,
+                        inactiveTactile
                     ),
                     ...this.createDemoGestureCue('TWO_FINGER_SWIPE'),
-                    ...this.withTelemetry(
-                        this.createIdleScene(this.demoScenePauseFrames),
-                        { open: 0, close: 0, command: 0, speed: 0, state: 'neutral' },
-                        { mode: 'inactive', assist: 0, contacts: 0 }
-                    ),
+                    ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
+                        const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
+                        const close = t < 0.2
+                            ? Math.round(this.lerp(24, 88, t / 0.2))
+                            : t < 0.82
+                                ? 88
+                                : Math.round(this.lerp(88, 28, (t - 0.82) / 0.18));
+                        const open = t < 0.84 ? 4 : Math.round(this.lerp(4, 10, (t - 0.84) / 0.16));
+                        const speed = t < 0.2
+                            ? Math.round(this.lerp(32, 86, t / 0.2))
+                            : t < 0.82
+                                ? 86
+                                : Math.round(this.lerp(86, 24, (t - 0.82) / 0.18));
+                        return {
+                            emgDrive: {
+                                open,
+                                close,
+                                command: Math.max(-100, Math.min(100, close - open)),
+                                speed,
+                                state: 'close'
+                            },
+                            tactileState: inactiveTactile
+                        };
+                    }),
+                    ...this.withTelemetry(this.createIdleScene(this.demoScenePauseFrames), neutralEmg, inactiveTactile),
                     ...this.withTelemetry(
                         this.createPinchScene(2, 260, 320, 600, 320, 38),
-                        { open: 14, close: 62, command: 48, speed: 58, state: 'close' },
-                        { mode: 'contact', assist: 28, contacts: 2 }
+                        neutralEmg,
+                        inactiveTactile
                     ),
                     ...this.createDemoGestureCue('TWO_FINGER_PINCH'),
-                    ...this.withTelemetry(
-                        this.createIdleScene(this.demoScenePauseFrames),
-                        { open: 0, close: 0, command: 0, speed: 0, state: 'neutral' },
-                        { mode: 'inactive', assist: 0, contacts: 0 }
-                    ),
+                    ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
+                        const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
+                        const close = t < 0.26
+                            ? Math.round(this.lerp(18, 64, t / 0.26))
+                            : t < 0.84
+                                ? 64
+                                : Math.round(this.lerp(64, 18, (t - 0.84) / 0.16));
+                        const open = t < 0.84 ? 8 : Math.round(this.lerp(8, 12, (t - 0.84) / 0.16));
+                        const speed = t < 0.26
+                            ? Math.round(this.lerp(20, 60, t / 0.26))
+                            : t < 0.84
+                                ? 60
+                                : Math.round(this.lerp(60, 18, (t - 0.84) / 0.16));
+                        const tactileState = t < 0.34
+                            ? inactiveTactile
+                            : {
+                                mode: 'contact',
+                                assist: Math.round(this.lerp(18, 42, Math.min(1, (t - 0.34) / 0.26))),
+                                contacts: 2
+                            };
+                        return {
+                            emgDrive: {
+                                open,
+                                close,
+                                command: Math.max(-100, Math.min(100, close - open)),
+                                speed,
+                                state: 'close'
+                            },
+                            tactileState
+                        };
+                    }),
+                    ...this.withTelemetry(this.createIdleScene(this.demoScenePauseFrames), neutralEmg, inactiveTactile),
                     ...this.withTelemetry(
                         this.createPinchScene(3, 240, 420, 640, 420, 40),
-                        { open: 12, close: 55, command: 43, speed: 50, state: 'close' },
-                        { mode: 'holding', assist: 44, contacts: 3 }
+                        neutralEmg,
+                        inactiveTactile
                     ),
                     ...this.createDemoGestureCue('THREE_FINGER_PINCH'),
-                    ...this.withTelemetry(
-                        this.createIdleScene(this.demoScenePauseFrames),
-                        { open: 0, close: 0, command: 0, speed: 0, state: 'neutral' },
-                        { mode: 'inactive', assist: 0, contacts: 0 }
-                    ),
+                    ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
+                        const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
+                        const close = t < 0.24
+                            ? Math.round(this.lerp(18, 58, t / 0.24))
+                            : t < 0.86
+                                ? 58
+                                : Math.round(this.lerp(58, 16, (t - 0.86) / 0.14));
+                        const open = t < 0.86 ? 7 : Math.round(this.lerp(7, 12, (t - 0.86) / 0.14));
+                        const speed = t < 0.24
+                            ? Math.round(this.lerp(18, 54, t / 0.24))
+                            : t < 0.86
+                                ? 54
+                                : Math.round(this.lerp(54, 16, (t - 0.86) / 0.14));
+                        let tactileState = inactiveTactile;
+                        if (t >= 0.22 && t < 0.52) {
+                            tactileState = {
+                                mode: 'contact',
+                                assist: Math.round(this.lerp(22, 36, (t - 0.22) / 0.3)),
+                                contacts: 3
+                            };
+                        } else if (t >= 0.52) {
+                            tactileState = {
+                                mode: 'holding',
+                                assist: Math.round(this.lerp(38, 58, Math.min(1, (t - 0.52) / 0.24))),
+                                contacts: 3
+                            };
+                        }
+                        return {
+                            emgDrive: {
+                                open,
+                                close,
+                                command: Math.max(-100, Math.min(100, close - open)),
+                                speed,
+                                state: 'close'
+                            },
+                            tactileState
+                        };
+                    }),
+                    ...this.withTelemetry(this.createIdleScene(this.demoScenePauseFrames), neutralEmg, inactiveTactile),
                     ...this.withTelemetry(
                         this.createPalmScene(12),
-                        { open: 0, close: 0, command: 0, speed: 0, state: 'neutral' },
-                        { mode: 'inactive', assist: 0, contacts: 0 }
-                    )
+                        neutralEmg,
+                        inactiveTactile
+                    ),
+                    ...this.withTelemetry(this.createIdleScene(this.demoScenePauseFrames), neutralEmg, inactiveTactile)
                 ];
             }
 
@@ -1331,6 +1477,26 @@
                     this.makeTactileStateLine(tactileState),
                     ...frame
                 ]);
+            }
+
+            createControlDriveScene(frameCount, telemetryBuilder) {
+                const frames = [];
+                for (let i = 0; i < frameCount; i++) {
+                    const telemetry = typeof telemetryBuilder === 'function'
+                        ? telemetryBuilder(i, frameCount)
+                        : telemetryBuilder;
+                    frames.push([
+                        this.makeEmgDriveLine(telemetry.emgDrive),
+                        this.makeTactileStateLine(telemetry.tactileState),
+                        ...this.makeFrame({
+                            fingers: 0,
+                            area: 0,
+                            palm: 0,
+                            contacts: []
+                        })
+                    ]);
+                }
+                return frames;
             }
 
             makeEmgDriveLine(emgDrive) {
@@ -1650,6 +1816,14 @@
                 this.resetModePreview();
             }
 
+            clearBehaviorLog() {
+                const logEl = document.getElementById('behaviorLog');
+                if (logEl) {
+                    logEl.textContent = '';
+                }
+                this.renderBehaviorMonitor();
+            }
+
             renderControllerState() {
                 const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
                 const summaryEl = document.getElementById('modeSummary');
@@ -1660,6 +1834,142 @@
                 const panel = document.getElementById('modePanel');
                 if (panel) {
                     panel.style.setProperty('--mode-accent', mode.accent);
+                }
+                this.renderBehaviorMonitor();
+            }
+
+            renderBehaviorMonitor() {
+                const currentEl = document.getElementById('behaviorCurrent');
+                const detailEl = document.getElementById('behaviorDetail');
+                if (!currentEl || !detailEl) {
+                    return;
+                }
+
+                const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
+                const emgState = (this.emgDrive.state || 'neutral').toLowerCase();
+                const tactileMode = (this.tactileState.mode || 'inactive').toLowerCase();
+                const speed = Math.max(0, Math.min(100, this.emgDrive.speed || 0));
+
+                if (this.tactileState.available && tactileMode !== 'inactive') {
+                    const tactileLabel = tactileMode === 'slip'
+                        ? 'Slip Correction'
+                        : tactileMode.charAt(0).toUpperCase() + tactileMode.slice(1);
+                    currentEl.textContent = `${tactileLabel} in ${mode.name}`;
+                    detailEl.textContent = `Adaptive assist ${this.tactileState.assist}% across ${this.tactileState.contacts} active contacts.`;
+                    return;
+                }
+
+                if (this.emgDrive.available && emgState !== 'neutral' && speed > 0) {
+                    currentEl.textContent = `${emgState === 'open' ? 'Opening' : 'Closing'} ${mode.name}`;
+                    detailEl.textContent = `Speed ${speed}% with Open Drive ${this.emgDrive.open}% and Close Drive ${this.emgDrive.close}%`;
+                    return;
+                }
+
+                if (this.controllerState.modeKey !== 'idle') {
+                    currentEl.textContent = `${mode.name} Selected`;
+                    detailEl.textContent = 'Awaiting EMG drive input to begin open or close behavior.';
+                    return;
+                }
+
+                currentEl.textContent = 'Standby';
+                detailEl.textContent = 'Waiting for a mode selection or drive command.';
+            }
+
+            gestureLabel(name) {
+                const map = {
+                    DOUBLE_TAP: 'double tap',
+                    TWO_FINGER_DOUBLE_TAP: 'two-finger double tap',
+                    TWO_FINGER_SWIPE: 'two-finger swipe',
+                    TWO_FINGER_PINCH: 'two-finger pinch',
+                    THREE_FINGER_PINCH: 'three-finger pinch',
+                    THREE_FINGER_SWIPE: 'three-finger swipe'
+                };
+                return map[name] || name.toLowerCase().replaceAll('_', ' ');
+            }
+
+            speedBandLabel(speed) {
+                if (speed >= 66) return 'high';
+                if (speed >= 31) return 'medium';
+                if (speed > 0) return 'low';
+                return 'neutral';
+            }
+
+            recordBehaviorEvent(message) {
+                const logEl = document.getElementById('behaviorLog');
+                if (!logEl) {
+                    return;
+                }
+
+                const li = document.createElement('li');
+                li.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+                logEl.prepend(li);
+
+                while (logEl.children.length > this.behaviorLogMax) {
+                    logEl.removeChild(logEl.lastChild);
+                }
+            }
+
+            resetBehaviorTracking() {
+                this.lastEmgBehaviorKey = '';
+                this.lastTactileBehaviorKey = '';
+            }
+
+            recordModeSwitchEvent(gestureName) {
+                const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
+                if (this.controllerState.modeKey === 'idle') {
+                    return;
+                }
+                this.recordBehaviorEvent(`Mode switched to ${mode.name} via ${this.gestureLabel(gestureName)}.`);
+            }
+
+            trackEmgBehaviorTransition() {
+                const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
+                const state = (this.emgDrive.state || 'neutral').toLowerCase();
+                const speed = Math.max(0, Math.min(100, this.emgDrive.speed || 0));
+                let nextKey = 'neutral';
+                let message = '';
+
+                if (this.emgDrive.available && state !== 'neutral' && speed > 0) {
+                    const band = this.speedBandLabel(speed);
+                    nextKey = `${this.controllerState.modeKey}:${state}:${band}`;
+                    message = `${state === 'open' ? 'Opening' : 'Closing'} ${mode.name} at ${band} velocity.`;
+                } else if (this.lastEmgBehaviorKey && this.lastEmgBehaviorKey !== 'neutral') {
+                    message = 'Drive returned to neutral.';
+                }
+
+                if (nextKey === this.lastEmgBehaviorKey) {
+                    return;
+                }
+
+                this.lastEmgBehaviorKey = nextKey;
+                if (message) {
+                    this.recordBehaviorEvent(message);
+                }
+            }
+
+            trackTactileBehaviorTransition() {
+                const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
+                const tactileMode = (this.tactileState.mode || 'inactive').toLowerCase();
+                let nextKey = 'inactive';
+                let message = '';
+
+                if (this.tactileState.available && tactileMode !== 'inactive') {
+                    const label = tactileMode === 'slip'
+                        ? 'Slip Correction'
+                        : tactileMode.charAt(0).toUpperCase() + tactileMode.slice(1);
+                    nextKey = `${this.controllerState.modeKey}:${tactileMode}`;
+                    message = `Adaptive grasping entered ${label} in ${mode.name}.`;
+                } else if (this.lastTactileBehaviorKey && this.lastTactileBehaviorKey !== 'inactive') {
+                    message = 'Adaptive grasping returned to inactive.';
+                }
+
+                if (nextKey === this.lastTactileBehaviorKey) {
+                    return;
+                }
+
+                this.lastTactileBehaviorKey = nextKey;
+                if (message) {
+                    this.recordBehaviorEvent(message);
                 }
             }
 
@@ -1688,8 +1998,10 @@
                     assist: 0,
                     contacts: 0
                 };
+                this.resetBehaviorTracking();
                 this.renderEmgDrive();
                 this.renderTactileState();
+                this.renderBehaviorMonitor();
             }
 
             renderEmgDrive() {
@@ -1737,6 +2049,7 @@
                 closeValueEl.textContent = `${closeValue}%`;
                 openFillEl.style.width = `${openValue}%`;
                 closeFillEl.style.width = `${closeValue}%`;
+                this.renderBehaviorMonitor();
             }
 
             renderTactileState() {
@@ -1758,6 +2071,7 @@
                 badgeEl.textContent = this.tactileState.available ? 'Live state' : 'Awaiting data';
                 assistEl.textContent = `${Math.max(0, Math.min(100, this.tactileState.assist || 0))}%`;
                 contactsEl.textContent = `${Math.max(0, Math.min(5, this.tactileState.contacts || 0))}`;
+                this.renderBehaviorMonitor();
             }
 
             modeKeyFromGesture(name) {
@@ -1865,6 +2179,7 @@
                             state: emgMatch[5].toLowerCase()
                         };
                         this.renderEmgDrive();
+                        this.trackEmgBehaviorTransition();
                     }
                     return;
                 }
@@ -1878,6 +2193,7 @@
                             contacts: Math.max(0, Math.min(5, parseInt(tactileMatch[3], 10)))
                         };
                         this.renderTactileState();
+                        this.trackTactileBehaviorTransition();
                     }
                     return;
                 }
@@ -2339,7 +2655,9 @@
                 logEl.prepend(li);
 
                 this.controllerState.modeKey = this.modeKeyFromGesture(name);
+                this.resetBehaviorTracking();
                 this.renderControllerState();
+                this.recordModeSwitchEvent(name);
 
                 while (logEl.children.length > this.gestureLogMax) {
                     logEl.removeChild(logEl.lastChild);
