@@ -3962,7 +3962,11 @@
                 const displayStartIndex = Math.max(0, displayEndIndex - displaySampleCount + 1);
                 const displaySamples = samples.slice(displayStartIndex, displayEndIndex + 1);
                 const displayEvents = events
-                    .filter((event) => event.sampleIndex >= displayStartIndex && event.sampleIndex <= displayEndIndex)
+                    .filter((event) =>
+                        event.sampleIndex >= displayStartIndex &&
+                        event.sampleIndex <= displayEndIndex &&
+                        event.type !== 'dual_activation'
+                    )
                     .map((event) => ({
                         ...event,
                         sampleIndex: event.sampleIndex - displayStartIndex
@@ -4074,13 +4078,18 @@
 
                 displayEvents.forEach((event) => {
                     const x = xForIndex(Math.max(0, Math.min(sampleCount - 1, event.sampleIndex)));
-                    const shortLabel = {
-                        mode_switch: 'MODE SWITCH',
-                        drive_start: 'START',
-                        drive_stop: 'END',
-                        dual_activation: 'DUAL',
-                        link_fault: 'FAULT'
-                    }[event.type] || event.type;
+                    const eventValueLabel = (event.value || '')
+                        .replace(/-/g, ' ')
+                        .trim()
+                        .toUpperCase();
+                    const shortLabel = event.type === 'drive_start'
+                        ? `START${eventValueLabel ? ` ${eventValueLabel}` : ''}`
+                        : event.type === 'drive_stop'
+                            ? `END${eventValueLabel ? ` ${eventValueLabel}` : ''}`
+                            : ({
+                                mode_switch: 'MODE SWITCH',
+                                link_fault: 'FAULT'
+                            }[event.type] || event.type.toUpperCase());
 
                     ctx.strokeStyle = 'rgba(180, 83, 9, 0.34)';
                     ctx.lineWidth = 2.2;
