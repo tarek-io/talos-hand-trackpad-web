@@ -720,7 +720,7 @@
                             <span id="modeLock" class="mode-chip-value">Unlocked</span>
                         </div>
                         <div class="mode-chip">
-                            <span class="mode-chip-label">Last Gesture</span>
+                            <span class="mode-chip-label">Trigger Gesture</span>
                             <span id="modeGesture" class="mode-chip-value">None</span>
                         </div>
                         <div class="mode-chip">
@@ -949,41 +949,41 @@
                         accent: '#0f766e',
                         summary: 'Waiting for the next gesture. Demo mode and live serial both drive this panel, so the controller state can be designed without hardware.'
                     },
-                    'two-swipe': {
-                        name: 'Two-Finger Swipe',
+                    'power-grasp': {
+                        name: 'Power Grasp',
                         figure: 'two-swipe',
                         accent: '#2563eb',
-                        summary: 'Directional two-point motion is active. This preview state is intended for broad navigation or mode stepping.'
+                        summary: 'Full-hand closing mode for cylindrical or secure object capture. This is the main high-force grasp state.'
                     },
-                    'two-pinch': {
-                        name: 'Two-Finger Pinch',
+                    'key-pinch': {
+                        name: 'Key Pinch',
                         figure: 'two-pinch',
                         accent: '#d97706',
-                        summary: 'Two contact points converge into a tighter control state. This is a strong candidate for precise command selection.'
+                        summary: 'Lateral pinch mode for thin objects such as keys, cards, or edges.'
                     },
-                    'two-spread': {
-                        name: 'Two-Finger Spread',
+                    hook: {
+                        name: 'Hook',
                         figure: 'two-spread',
                         accent: '#16a34a',
-                        summary: 'Two contact points expand outward. This preview state reads as an opening or widening action.'
+                        summary: 'Carry-oriented hook posture for handles, straps, and suspended loads.'
                     },
-                    'three-swipe': {
-                        name: 'Three-Finger Swipe',
+                    point: {
+                        name: 'Point',
                         figure: 'three-swipe',
                         accent: '#7c3aed',
-                        summary: 'Three-point directional input is active. This is the most expressive large-motion state in the current gesture set.'
+                        summary: 'Index-led pointing mode for buttons, interfaces, and precise directional interaction.'
                     },
-                    'three-pinch': {
-                        name: 'Three-Finger Pinch',
+                    tripod: {
+                        name: 'Tripod',
                         figure: 'three-pinch',
                         accent: '#be185d',
-                        summary: 'Three contacts compress into a compact control pose. It reads as a deliberate grouped command rather than free navigation.'
+                        summary: 'Three-point precision grasp for smaller objects and fine manipulation.'
                     },
-                    'three-spread': {
-                        name: 'Three-Finger Spread',
+                    'thumbs-up': {
+                        name: 'Thumbs Up',
                         figure: 'three-spread',
                         accent: '#0891b2',
-                        summary: 'Three contacts fan outward into the widest pose. This is useful for previewing a more expansive controller response.'
+                        summary: 'Expressive confirmation pose with a clear social signal and a distinct visual identity.'
                     }
                 };
 
@@ -1485,12 +1485,12 @@
 
             modeKeyFromGesture(name) {
                 const map = {
-                    'TWO_FINGER_SWIPE': 'two-swipe',
-                    'TWO_FINGER_PINCH': 'two-pinch',
-                    'TWO_FINGER_SPREAD': 'two-spread',
-                    'THREE_FINGER_SWIPE': 'three-swipe',
-                    'THREE_FINGER_PINCH': 'three-pinch',
-                    'THREE_FINGER_SPREAD': 'three-spread'
+                    'TWO_FINGER_SWIPE': 'power-grasp',
+                    'TWO_FINGER_PINCH': 'key-pinch',
+                    'TWO_FINGER_SPREAD': 'hook',
+                    'THREE_FINGER_SWIPE': 'point',
+                    'THREE_FINGER_PINCH': 'tripod',
+                    'THREE_FINGER_SPREAD': 'thumbs-up'
                 };
 
                 return map[name] || 'idle';
@@ -1989,7 +1989,7 @@
 
                 this.controllerState.modeKey = this.modeKeyFromGesture(name);
                 this.controllerState.lastGesture = formattedGesture;
-                this.controllerState.stateLabel = `${formattedGesture} recognized`;
+                this.controllerState.stateLabel = `${this.modeCatalog[this.controllerState.modeKey].name} selected`;
                 this.renderControllerState(true);
 
                 while (logEl.children.length > this.gestureLogMax) {
