@@ -1320,6 +1320,7 @@
                 this.demoReleaseFrames = 144;
                 this.emgActivationThreshold = 22;
                 this.emgDominanceHysteresis = 8;
+                this.emgReleaseThreshold = Math.max(0, this.emgActivationThreshold - Math.trunc(this.emgDominanceHysteresis / 2));
                 this.emgNormalizationMax = 1600;
                 this.commandRiseStep = 4;
                 this.commandFallStep = 6;
@@ -2360,13 +2361,31 @@
             demoResolveIntent(openDrive, closeDrive) {
                 const threshold = this.emgActivationThreshold;
                 const hysteresis = this.emgDominanceHysteresis;
+                const releaseThreshold = this.emgReleaseThreshold;
+                const lastState = this.demoEmgState?.lastState || 'neutral';
                 const openActive = openDrive >= threshold;
                 const closeActive = closeDrive >= threshold;
                 const difference = Math.abs(openDrive - closeDrive);
                 let state = 'neutral';
                 let dualActivation = false;
 
-                if (openActive && closeActive && difference < hysteresis) {
+                if (lastState === 'close') {
+                    if (openActive && openDrive >= closeDrive + hysteresis) {
+                        state = 'open';
+                    } else if (closeDrive >= releaseThreshold && closeDrive + hysteresis > openDrive) {
+                        state = 'close';
+                    } else if (openActive && closeActive && difference < hysteresis) {
+                        dualActivation = true;
+                    }
+                } else if (lastState === 'open') {
+                    if (closeActive && closeDrive >= openDrive + hysteresis) {
+                        state = 'close';
+                    } else if (openDrive >= releaseThreshold && openDrive + hysteresis > closeDrive) {
+                        state = 'open';
+                    } else if (openActive && closeActive && difference < hysteresis) {
+                        dualActivation = true;
+                    }
+                } else if (openActive && closeActive && difference < hysteresis) {
                     dualActivation = true;
                 } else if (closeActive && closeDrive >= openDrive + hysteresis) {
                     state = 'close';
@@ -3989,7 +4008,8 @@
                 );
 
                 drawHorizontalRule(rawLaneIndex, 50, 'rgba(63, 82, 76, 0.34)', 'bias', [4, 6]);
-                drawHorizontalRule(derivedLaneIndex, threshold, 'rgba(180, 83, 9, 0.72)', `thr ${threshold}`);
+                drawHorizontalRule(derivedLaneIndex, threshold, 'rgba(180, 83, 9, 0.72)', `on ${threshold}`);
+                drawHorizontalRule(derivedLaneIndex, this.emgReleaseThreshold, 'rgba(120, 53, 15, 0.44)', `off ${this.emgReleaseThreshold}`);
 
                 const derivedLaneTop = margin.top + (laneHeight * derivedLaneIndex);
                 if (sampleCount > 1) {
@@ -4101,7 +4121,7 @@
                 ctx.font = '700 13px Aptos, Segoe UI Variable, sans-serif';
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(`logic: thr ${threshold} / hyst ${hysteresis}`, canvas.width - margin.right - 8, derivedLaneTop + 52);
+                ctx.fillText(`logic: on ${threshold} / off ${this.emgReleaseThreshold} / hyst ${hysteresis}`, canvas.width - margin.right - 8, derivedLaneTop + 52);
             }
 
             drawGrid() {
