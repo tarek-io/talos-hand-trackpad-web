@@ -1625,15 +1625,21 @@
                 this.emgDominanceHysteresis = 8;
                 this.emgReleaseThreshold = Math.max(0, this.emgActivationThreshold - Math.trunc(this.emgDominanceHysteresis / 2));
                 this.emgNormalizationMax = 1600;
-                this.commandTargetRiseStep = 3;
-                this.commandTargetFallStep = 4;
-                this.commandTargetQuietZone = 4;
-                this.commandRiseStep = 4;
-                this.commandFallStep = 6;
-                this.cardDriveRiseStep = 3;
-                this.cardDriveFallStep = 4;
-                this.cardSpeedRiseStep = 3;
-                this.cardSpeedFallStep = 5;
+                this.commandTargetRiseStep = 2;
+                this.commandTargetFallStep = 3;
+                this.commandTargetQuietZone = 6;
+                this.commandRiseStep = 2;
+                this.commandFallStep = 3;
+                this.cardDriveRiseStep = 2;
+                this.cardDriveFallStep = 3;
+                this.cardSpeedRiseStep = 2;
+                this.cardSpeedFallStep = 3;
+                this.plotDriveRiseStep = 2;
+                this.plotDriveFallStep = 3;
+                this.plotDriveQuietZone = 2;
+                this.plotSpeedRiseStep = 2;
+                this.plotSpeedFallStep = 3;
+                this.plotSpeedQuietZone = 2;
                 this.modeSpeedCaps = {
                     idle: 44,
                     'open-hand': 44,
@@ -4648,6 +4654,19 @@
                     ctx.setLineDash([]);
                 };
 
+                const smoothDisplaySeries = (values, riseStep, fallStep, quietZone = 0) => {
+                    let current = 0;
+                    return values.map((value, index) => {
+                        const target = value <= quietZone ? 0 : value;
+                        if (index === 0) {
+                            current = target;
+                            return current;
+                        }
+                        current = this.stepTowardValue(current, target, riseStep, fallStep);
+                        return current;
+                    });
+                };
+
                 const drawHorizontalRule = (laneIndex, value, color, label, dash = [8, 6]) => {
                     const y = yForPercent(laneIndex, value);
                     ctx.beginPath();
@@ -4671,16 +4690,19 @@
                 const normalizeRawSignal = (rawValue) => Math.max(0, Math.min(100, 50 + ((rawValue - rawDisplayCenter) * rawDisplayGain)));
                 const raw1 = displaySamples.map((sample) => normalizeRawSignal(sample.raw1));
                 const raw2 = displaySamples.map((sample) => normalizeRawSignal(sample.raw2));
-                const openDrive = displaySamples.map((sample) => sample.openDrive);
-                const closeDrive = displaySamples.map((sample) => sample.closeDrive);
-                const requestedSpeed = displaySamples.map((sample) => sample.requestedSpeed);
+                const openDriveRaw = displaySamples.map((sample) => sample.openDrive);
+                const closeDriveRaw = displaySamples.map((sample) => sample.closeDrive);
+                const requestedSpeedRaw = displaySamples.map((sample) => sample.requestedSpeed);
+                const openDrive = smoothDisplaySeries(openDriveRaw, this.plotDriveRiseStep, this.plotDriveFallStep, this.plotDriveQuietZone);
+                const closeDrive = smoothDisplaySeries(closeDriveRaw, this.plotDriveRiseStep, this.plotDriveFallStep, this.plotDriveQuietZone);
+                const requestedSpeed = smoothDisplaySeries(requestedSpeedRaw, this.plotSpeedRiseStep, this.plotSpeedFallStep, this.plotSpeedQuietZone);
                 const speedCaps = displaySamples.map((sample) => modeSpeedCap(sample.modeKey));
                 const sharedComparablePeak = Math.max(
                     threshold,
                     this.emgReleaseThreshold,
-                    ...openDrive,
-                    ...closeDrive,
-                    ...requestedSpeed
+                    ...openDriveRaw,
+                    ...closeDriveRaw,
+                    ...requestedSpeedRaw
                 );
                 comparableDisplayMax = Math.max(
                     24,
