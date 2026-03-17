@@ -387,32 +387,29 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.34fr) minmax(0, 0.84fr);
             gap: 20px;
             align-items: start;
         }
 
         .dashboard-main {
             min-width: 0;
+            display: grid;
+            gap: 14px;
             align-content: start;
         }
 
-        .dashboard-side {
+        .dashboard-emg,
+        .dashboard-adaptive {
             min-width: 0;
             display: grid;
             gap: 16px;
             align-content: start;
         }
 
-        .dashboard-side-top {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            align-items: start;
-        }
-
-        .dashboard-side > .stack-panel,
-        .dashboard-side-top > .stack-panel {
+        .dashboard-main > .stack-panel,
+        .dashboard-emg > .stack-panel,
+        .dashboard-adaptive > .stack-panel {
             display: grid;
             gap: 10px;
         }
@@ -1127,10 +1124,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .dashboard-side-top {
-                grid-template-columns: 1fr;
-            }
-
             .adaptive-metrics {
                 grid-template-columns: 1fr;
             }
@@ -1236,112 +1229,50 @@
                     </div>
                 </div>
 
-                <div class="dashboard-side">
-                    <div class="dashboard-side-top">
-                        <div class="stack-panel">
-                            <h3 class="stack-title">EMG Drive</h3>
+                <div class="dashboard-emg">
+                    <div class="stack-panel">
+                        <h3 class="stack-title">EMG Drive</h3>
 
-                            <div class="command-card">
-                                <p class="command-eyebrow">Closure Command</p>
-                                <div class="command-state-row">
-                                    <h3 id="commandState" class="command-state">Neutral</h3>
-                                    <div id="commandSpeed" class="command-speed">Speed 0%</div>
-                                </div>
-                                <div class="command-track-wrap">
-                                    <div class="command-track">
-                                        <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
-                                        <div class="command-center-line"></div>
-                                    </div>
-                                    <div class="command-axis-labels">
-                                        <span>Open</span>
-                                        <span>Neutral</span>
-                                        <span>Close</span>
-                                    </div>
-                                </div>
-                                <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
+                        <div class="command-card">
+                            <p class="command-eyebrow">Closure Command</p>
+                            <div class="command-state-row">
+                                <h3 id="commandState" class="command-state">Neutral</h3>
+                                <div id="commandSpeed" class="command-speed">Speed 0%</div>
                             </div>
-
-                            <div class="emg-sources">
-                                <div class="emg-source-row">
-                                    <div class="emg-source-header">
-                                        <span>Open Drive</span>
-                                        <span id="openDriveValue">0%</span>
-                                    </div>
-                                    <div class="emg-source-track">
-                                        <div class="emg-threshold"></div>
-                                        <div id="openDriveFill" class="emg-source-fill open" style="width: 0%;"></div>
-                                    </div>
+                            <div class="command-track-wrap">
+                                <div class="command-track">
+                                    <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
+                                    <div class="command-center-line"></div>
                                 </div>
-
-                                <div class="emg-source-row">
-                                    <div class="emg-source-header">
-                                        <span>Close Drive</span>
-                                        <span id="closeDriveValue">0%</span>
-                                    </div>
-                                    <div class="emg-source-track">
-                                        <div class="emg-threshold"></div>
-                                        <div id="closeDriveFill" class="emg-source-fill close" style="width: 0%;"></div>
-                                    </div>
+                                <div class="command-axis-labels">
+                                    <span>Open</span>
+                                    <span>Neutral</span>
+                                    <span>Close</span>
                                 </div>
                             </div>
+                            <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
                         </div>
 
-                        <div class="stack-panel">
-                            <h3 class="stack-title">Adaptive Grasping</h3>
-                            <div class="adaptive-panel">
-                                <div class="adaptive-status-card">
-                                    <div class="adaptive-state-row">
-                                        <h3 id="adaptiveState" class="adaptive-state">Inactive</h3>
-                                        <div id="adaptiveBadge" class="adaptive-badge">Awaiting data</div>
-                                    </div>
-                                    <p id="adaptiveSummary" class="adaptive-summary">Awaiting tactile feedback before adaptive support engages.</p>
-
-                                    <div class="adaptive-metrics">
-                                        <div class="adaptive-metric">
-                                            <p class="adaptive-metric-label">Assist</p>
-                                            <p id="adaptiveAssist" class="adaptive-metric-value">0%</p>
-                                        </div>
-                                        <div class="adaptive-metric">
-                                            <p class="adaptive-metric-label">Contacts</p>
-                                            <p id="adaptiveContacts" class="adaptive-metric-value">0</p>
-                                        </div>
-                                        <div class="adaptive-metric">
-                                            <p class="adaptive-metric-label">Phase</p>
-                                            <p id="adaptivePhase" class="adaptive-metric-value">Idle</p>
-                                        </div>
-                                    </div>
+                        <div class="emg-sources">
+                            <div class="emg-source-row">
+                                <div class="emg-source-header">
+                                    <span>Open Drive</span>
+                                    <span id="openDriveValue">0%</span>
                                 </div>
-
-                                <div class="adaptive-section">
-                                    <div class="adaptive-section-header">
-                                        <h4 class="adaptive-section-title">Fingertip Sensing</h4>
-                                        <span id="adaptivePattern" class="adaptive-section-note">No active fingers</span>
-                                    </div>
-                                    <div id="adaptiveFingerGrid" class="adaptive-finger-grid"></div>
+                                <div class="emg-source-track">
+                                    <div class="emg-threshold"></div>
+                                    <div id="openDriveFill" class="emg-source-fill open" style="width: 0%;"></div>
                                 </div>
+                            </div>
 
-                                <div class="adaptive-section">
-                                    <div class="adaptive-section-header">
-                                        <h4 class="adaptive-section-title">Controller Response</h4>
-                                        <span id="adaptiveResponseMode" class="adaptive-section-note">Idle response</span>
-                                    </div>
-
-                                    <div class="adaptive-response-grid">
-                                        <div class="adaptive-response-card">
-                                            <p class="adaptive-response-label">Assist Bias</p>
-                                            <p id="adaptiveHoldBias" class="adaptive-response-value">0%</p>
-                                        </div>
-                                        <div class="adaptive-response-card">
-                                            <p class="adaptive-response-label">Slip Guard</p>
-                                            <p id="adaptiveSlipGuard" class="adaptive-response-value">Standby</p>
-                                        </div>
-                                        <div class="adaptive-response-card">
-                                            <p class="adaptive-response-label">Lead Fingers</p>
-                                            <p id="adaptiveLeadFingers" class="adaptive-response-value">None</p>
-                                        </div>
-                                    </div>
-
-                                    <p id="adaptiveResponseNote" class="adaptive-response-note">Awaiting fingertip contact before adaptive grasping adds hand-side support.</p>
+                            <div class="emg-source-row">
+                                <div class="emg-source-header">
+                                    <span>Close Drive</span>
+                                    <span id="closeDriveValue">0%</span>
+                                </div>
+                                <div class="emg-source-track">
+                                    <div class="emg-threshold"></div>
+                                    <div id="closeDriveFill" class="emg-source-fill close" style="width: 0%;"></div>
                                 </div>
                             </div>
                         </div>
@@ -1370,6 +1301,68 @@
                         </div>
                         <div class="timeline-wrap">
                             <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="980"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-adaptive">
+                    <div class="stack-panel">
+                        <h3 class="stack-title">Adaptive Grasping</h3>
+                        <div class="adaptive-panel">
+                            <div class="adaptive-status-card">
+                                <div class="adaptive-state-row">
+                                    <h3 id="adaptiveState" class="adaptive-state">Inactive</h3>
+                                    <div id="adaptiveBadge" class="adaptive-badge">Awaiting data</div>
+                                </div>
+                                <p id="adaptiveSummary" class="adaptive-summary">Awaiting tactile feedback before adaptive support engages.</p>
+
+                                <div class="adaptive-metrics">
+                                    <div class="adaptive-metric">
+                                        <p class="adaptive-metric-label">Assist</p>
+                                        <p id="adaptiveAssist" class="adaptive-metric-value">0%</p>
+                                    </div>
+                                    <div class="adaptive-metric">
+                                        <p class="adaptive-metric-label">Contacts</p>
+                                        <p id="adaptiveContacts" class="adaptive-metric-value">0</p>
+                                    </div>
+                                    <div class="adaptive-metric">
+                                        <p class="adaptive-metric-label">Phase</p>
+                                        <p id="adaptivePhase" class="adaptive-metric-value">Idle</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="adaptive-section">
+                                <div class="adaptive-section-header">
+                                    <h4 class="adaptive-section-title">Fingertip Sensing</h4>
+                                    <span id="adaptivePattern" class="adaptive-section-note">No active fingers</span>
+                                </div>
+                                <div id="adaptiveFingerGrid" class="adaptive-finger-grid"></div>
+                            </div>
+
+                            <div class="adaptive-section">
+                                <div class="adaptive-section-header">
+                                    <h4 class="adaptive-section-title">Controller Response</h4>
+                                    <span id="adaptiveResponseMode" class="adaptive-section-note">Idle response</span>
+                                </div>
+
+                                <div class="adaptive-response-grid">
+                                    <div class="adaptive-response-card">
+                                        <p class="adaptive-response-label">Assist Bias</p>
+                                        <p id="adaptiveHoldBias" class="adaptive-response-value">0%</p>
+                                    </div>
+                                    <div class="adaptive-response-card">
+                                        <p class="adaptive-response-label">Slip Guard</p>
+                                        <p id="adaptiveSlipGuard" class="adaptive-response-value">Standby</p>
+                                    </div>
+                                    <div class="adaptive-response-card">
+                                        <p class="adaptive-response-label">Lead Fingers</p>
+                                        <p id="adaptiveLeadFingers" class="adaptive-response-value">None</p>
+                                    </div>
+                                </div>
+
+                                <p id="adaptiveResponseNote" class="adaptive-response-note">Awaiting fingertip contact before adaptive grasping adds hand-side support.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
