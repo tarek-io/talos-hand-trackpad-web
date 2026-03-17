@@ -308,11 +308,13 @@
         }
 
         .behavior-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 4px;
+            position: relative;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .behavior-header > div {
+            padding-right: 100px;
         }
 
         .behavior-current {
@@ -455,11 +457,24 @@
         }
 
         .gesture-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 4px;
+            position: relative;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .gesture-toolbar .gesture-title {
+            display: block;
+            padding-right: 100px;
+        }
+
+        .behavior-header .clear-btn,
+        .gesture-toolbar .clear-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 12px;
+            font-size: 12px;
+            box-shadow: 0 8px 18px rgba(24, 33, 31, 0.08);
         }
 
         .gesture-title {
