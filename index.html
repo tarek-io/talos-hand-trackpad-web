@@ -3619,14 +3619,13 @@
                 const lanes = [
                     { labelLines: ['EMG 1', 'raw / filtered'], key: 'emg1' },
                     { labelLines: ['EMG 2', 'raw / filtered'], key: 'emg2' },
-                    { labelLines: ['Open', 'drive'], key: 'openDrive' },
-                    { labelLines: ['Close', 'drive'], key: 'closeDrive' },
-                    { labelLines: ['Requested', 'speed'], key: 'requestedSpeed' }
+                    { labelLines: ['Derived', 'open / close / speed'], key: 'derivedControl' }
                 ];
                 const margin = { top: 42, right: 18, bottom: 18, left: 156 };
                 const plotWidth = canvas.width - margin.left - margin.right;
                 const plotHeight = canvas.height - margin.top - margin.bottom;
                 const laneHeight = plotHeight / lanes.length;
+                const derivedLaneIndex = 2;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#ffffff';
@@ -3673,7 +3672,7 @@
                     return laneTop + laneHeight - 12 - ((clamped / 100) * (laneHeight - 24));
                 };
 
-                const drawSeries = (values, laneIndex, color, lineWidth) => {
+                const drawSeries = (values, laneIndex, color, lineWidth, dash = []) => {
                     ctx.beginPath();
                     values.forEach((value, index) => {
                         const x = xForIndex(index);
@@ -3688,7 +3687,9 @@
                     ctx.lineWidth = lineWidth;
                     ctx.lineJoin = 'round';
                     ctx.lineCap = 'round';
+                    ctx.setLineDash(dash);
                     ctx.stroke();
+                    ctx.setLineDash([]);
                 };
 
                 const raw1 = samples.map((sample) => (sample.raw1 / 4095) * 100);
@@ -3726,12 +3727,38 @@
                 });
 
                 drawSeries(raw1, 0, 'rgba(37, 99, 235, 0.34)', 1.5);
-                drawSeries(filtered1, 0, '#2563eb', 2.2);
+                drawSeries(filtered1, 0, '#2563eb', 2.4);
                 drawSeries(raw2, 1, 'rgba(5, 150, 105, 0.34)', 1.5);
-                drawSeries(filtered2, 1, '#059669', 2.2);
-                drawSeries(openDrive, 2, '#3b82f6', 2.2);
-                drawSeries(closeDrive, 3, '#10b981', 2.2);
-                drawSeries(requestedSpeed, 4, '#d97706', 2.2);
+                drawSeries(filtered2, 1, '#059669', 2.4);
+                drawSeries(openDrive, derivedLaneIndex, '#3b82f6', 2.4);
+                drawSeries(closeDrive, derivedLaneIndex, '#10b981', 2.4);
+                drawSeries(requestedSpeed, derivedLaneIndex, '#d97706', 2.8, [12, 8]);
+
+                const derivedLaneTop = margin.top + (laneHeight * derivedLaneIndex);
+                const legendItems = [
+                    { label: 'open', color: '#3b82f6', dash: [] },
+                    { label: 'close', color: '#10b981', dash: [] },
+                    { label: 'speed', color: '#d97706', dash: [12, 8] }
+                ];
+                let legendX = canvas.width - margin.right - 238;
+                const legendY = derivedLaneTop + 24;
+                legendItems.forEach((item) => {
+                    ctx.beginPath();
+                    ctx.setLineDash(item.dash);
+                    ctx.strokeStyle = item.color;
+                    ctx.lineWidth = 3;
+                    ctx.moveTo(legendX, legendY);
+                    ctx.lineTo(legendX + 24, legendY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
+                    ctx.font = '700 13px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.label, legendX + 32, legendY);
+                    legendX += 78;
+                });
             }
 
             drawGrid() {
