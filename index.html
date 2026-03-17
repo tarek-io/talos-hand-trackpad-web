@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Talos Hand Control Dashboard</title>
+    <title>Talos Hand Trackpad Interface</title>
     <style>
         :root {
             --bg-cream: #f5efe3;
@@ -303,55 +303,8 @@
             max-width: 480px;
         }
 
-        .workspace-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.9fr) minmax(300px, 0.82fr);
-            gap: 18px;
-            align-items: start;
-        }
-
-        .column-stack {
-            min-width: 0;
-            display: grid;
-            gap: 16px;
-            align-content: start;
-        }
-
-        .section-intro {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 16px 18px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .section-eyebrow {
-            margin: 0 0 6px 0;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-        }
-
-        .section-title {
-            margin: 0;
-            color: var(--ink);
-            font-family: var(--font-display);
-            font-size: clamp(22px, 3vw, 30px);
-            line-height: 1.02;
-            letter-spacing: -0.03em;
-        }
-
-        .section-copy {
-            margin: 10px 0 0 0;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
         .behavior-panel {
-            margin-bottom: 0;
+            margin-bottom: 20px;
         }
 
         .behavior-header {
@@ -396,7 +349,6 @@
             border-radius: var(--radius-lg);
             overflow: hidden;
             margin: 0 auto;
-            max-width: 92%;
             position: relative;
             background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(240, 246, 242, 0.72));
             padding: 12px;
@@ -412,9 +364,27 @@
             background-color: var(--canvas-surface);
         }
 
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .dashboard-main {
+            min-width: 0;
+        }
+
+        .dashboard-side {
+            min-width: 0;
+            display: grid;
+            gap: 16px;
+        }
+
         .info-panel {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 20px;
             gap: 14px;
         }
 
@@ -467,6 +437,7 @@
         }
 
         .gesture-panel {
+            margin-top: 20px;
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
@@ -742,12 +713,12 @@
         }
 
         .serial-panel {
+            margin-top: 20px;
             background: linear-gradient(180deg, rgba(19, 27, 25, 0.95), rgba(13, 18, 17, 0.96));
             border: 1px solid rgba(66, 88, 80, 0.46);
             border-radius: var(--radius-lg);
             padding: 16px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            min-height: 100%;
         }
 
         .serial-toolbar {
@@ -819,7 +790,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .workspace-grid {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -841,7 +812,7 @@
                 <div class="page-header-main">
                     <div class="page-header-copy">
                         <p class="eyebrow">Talos Hand</p>
-                        <h1>Control Dashboard</h1>
+                        <h1>Trackpad Interface</h1>
                     </div>
                     <div class="page-header-actions">
                         <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode</button>
@@ -864,34 +835,28 @@
 
             <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for simulated input</div>
 
-            <div class="workspace-grid">
-                <div class="column-stack">
-                    <div class="section-intro">
-                        <p class="section-eyebrow">Input Subsystem</p>
-                        <h2 class="section-title">Trackpad Interface</h2>
-                        <p class="section-copy">Mode selection, gesture recognition, and live contact visualization for the trackpad input path.</p>
-                    </div>
+            <div id="modePanel" class="mode-panel">
+                <div class="mode-copy-wrap">
+                    <p class="mode-eyebrow">Current Mode</p>
+                    <h2 id="modeName" class="mode-name">Standby</h2>
+                    <p id="modeSummary" class="mode-summary" style="display: none;"></p>
+                </div>
+            </div>
 
-                    <div id="modePanel" class="mode-panel">
-                        <div class="mode-copy-wrap">
-                            <p class="mode-eyebrow">Current Mode</p>
-                            <h2 id="modeName" class="mode-name">Standby</h2>
-                            <p id="modeSummary" class="mode-summary" style="display: none;"></p>
-                        </div>
+            <div class="stack-panel behavior-panel">
+                <div class="behavior-header">
+                    <div>
+                        <h3 class="stack-title">Behavior Monitor</h3>
+                        <h3 id="behaviorCurrent" class="behavior-current">Standby</h3>
                     </div>
+                    <button id="clearBehaviorBtn" class="clear-btn">Clear Log</button>
+                </div>
+                <p id="behaviorDetail" class="behavior-detail">Waiting for a mode selection or drive command.</p>
+                <ul id="behaviorLog" class="behavior-log"></ul>
+            </div>
 
-                    <div class="stack-panel behavior-panel">
-                        <div class="behavior-header">
-                            <div>
-                                <h3 class="stack-title">Behavior Monitor</h3>
-                                <h3 id="behaviorCurrent" class="behavior-current">Standby</h3>
-                            </div>
-                            <button id="clearBehaviorBtn" class="clear-btn">Clear Log</button>
-                        </div>
-                        <p id="behaviorDetail" class="behavior-detail">Waiting for a mode selection or drive command.</p>
-                        <ul id="behaviorLog" class="behavior-log"></ul>
-                    </div>
-
+            <div class="dashboard-grid">
+                <div class="dashboard-main">
                     <div class="gesture-panel">
                         <div class="gesture-toolbar">
                             <h3 class="gesture-title">Gesture Detector</h3>
@@ -925,12 +890,7 @@
                     </div>
                 </div>
 
-                <div class="column-stack">
-                    <div class="section-intro">
-                        <p class="section-eyebrow">Drive and Response</p>
-                        <h2 class="section-title">EMG and Adaptive Control</h2>
-                        <p class="section-copy">Interpreted drive intent, source contribution, and tactile-state response stay isolated on this side.</p>
-                    </div>
+                <div class="dashboard-side">
                     <div class="stack-panel">
                         <h3 class="stack-title">EMG Drive</h3>
                         <p class="stack-subtitle">Interpreted closure command first, then the two EMG source contributions that produced it.</p>
@@ -1003,25 +963,17 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="column-stack">
-                    <div class="section-intro">
-                        <p class="section-eyebrow">Diagnostics</p>
-                        <h2 class="section-title">Live Serial Reader</h2>
-                        <p class="section-copy">Raw transport and debug output stay isolated as the third monitoring column.</p>
+            <div class="serial-panel">
+                <div class="serial-toolbar">
+                    <div>
+                        <h3 class="gesture-title">Live Serial Reader</h3>
+                        <div id="serialStats" class="serial-stats">Lines: 0</div>
                     </div>
-
-                    <div class="serial-panel">
-                        <div class="serial-toolbar">
-                            <div>
-                                <h3 class="gesture-title">Live Serial Reader</h3>
-                                <div id="serialStats" class="serial-stats">Lines: 0</div>
-                            </div>
-                            <button id="clearSerialBtn" class="clear-btn">Clear Serial Log</button>
-                        </div>
-                        <div id="serialOutput" class="serial-output"></div>
-                    </div>
+                    <button id="clearSerialBtn" class="clear-btn">Clear Serial Log</button>
                 </div>
+                <div id="serialOutput" class="serial-output"></div>
             </div>
         </div>
     </div>
