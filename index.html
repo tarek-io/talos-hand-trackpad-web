@@ -1320,6 +1320,7 @@
                 this.demoReleaseFrames = 108;
                 this.emgActivationThreshold = 18;
                 this.emgDominanceHysteresis = 8;
+                this.emgNormalizationMax = 1600;
                 this.commandRiseStep = 4;
                 this.commandFallStep = 6;
                 this.modeSpeedCaps = {
@@ -1332,6 +1333,9 @@
                     'thumbs-up': 34
                 };
                 this.syntheticRawTick = 0;
+                this.demoEmgBaselineCh1 = 2048;
+                this.demoEmgBaselineCh2 = 2048;
+                this.demoEmgState = null;
                 this.lastEmgBehaviorKey = '';
                 this.lastTactileBehaviorKey = '';
                 this.modeCatalog = {
@@ -1945,20 +1949,21 @@
             }
 
             buildDemoFrames() {
-                const neutralTelemetry = this.buildEmgTelemetryBundle('open-hand', 'neutral', 0, 0, 0);
+                this.resetDemoEmgPipeline();
                 const inactiveTactile = { mode: 'inactive', assist: 0, contacts: 0 };
                 const releaseFrames = this.demoReleaseFrames;
-                const makeDriveFrame = (modeKey, drive, tactileState, events = []) => ({
-                    telemetryBundle: this.buildEmgTelemetryBundle(
-                        modeKey,
-                        drive.commandState,
-                        drive.requestedSpeed,
-                        drive.openDrive,
-                        drive.closeDrive
-                    ),
-                    tactileState,
-                    events
+                const neutralTelemetry = () => ({
+                    ...this.buildEmgTelemetryBundle('open-hand', { openPercent: 0, closePercent: 0, activity: 0 }),
+                    tactileState: inactiveTactile
                 });
+                const makeDriveFrame = (modeKey, signalProfile, tactileState, events = []) => {
+                    const telemetry = this.buildEmgTelemetryBundle(modeKey, signalProfile);
+                    return {
+                        telemetryBundle: telemetry.telemetryBundle,
+                        tactileState,
+                        events: [...events, ...telemetry.events]
+                    };
+                };
 
                 return [
                     ...this.withTelemetry(
@@ -1968,51 +1973,37 @@
                     ),
                     ...this.createDemoGestureCue('TWO_FINGER_SWIPE'),
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             peakClose: 76,
                             supportOpen: 6,
-                            peakSpeed: 66,
                             settle: 0.18,
                             rampEnd: 0.54,
                             holdEnd: 0.82,
-                            peakActivity: 0.9,
-                            speedGain: 0.82
+                            peakActivity: 0.9
                         });
-                        const driveStartFrame = Math.round(frameCount * 0.24);
                         return makeDriveFrame(
                             'power-grasp',
-                            drive,
+                            signal,
                             inactiveTactile,
-                            [
-                                ...(frameIndex === 0 ? [{ type: 'mode_switch', value: 'power-grasp' }] : []),
-                                ...(frameIndex === driveStartFrame ? [{ type: 'drive_start', value: 'close' }] : [])
-                            ]
+                            frameIndex === 0 ? [{ type: 'mode_switch', value: 'power-grasp' }] : []
                         );
                     }),
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
                             peakOpen: 58,
                             supportClose: 5,
-                            peakSpeed: 48,
                             settle: 0.1,
                             rampEnd: 0.44,
                             holdEnd: 0.7,
                             peakActivity: 0.78,
-                            speedGain: 0.76,
                             holdDrift: 0.028,
                             tailFloor: 0.02
                         });
                         return makeDriveFrame(
                             'power-grasp',
-                            drive,
-                            inactiveTactile,
-                            frameIndex === 0
-                                ? [
-                                    { type: 'drive_stop', value: 'close' },
-                                    { type: 'drive_start', value: 'open' }
-                                ]
-                                : []
+                            signal,
+                            inactiveTactile
                         );
                     }),
                     ...this.withTelemetry(
@@ -2020,7 +2011,6 @@
                         neutralTelemetry,
                         inactiveTactile,
                         [
-                            this.makeEventLine('drive_stop', 'open'),
                             this.makeEventLine('mode_switch', 'open-hand')
                         ]
                     ),
@@ -2032,50 +2022,42 @@
                     ...this.createDemoGestureCue('TWO_FINGER_PINCH'),
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             peakClose: 56,
                             supportOpen: 10,
-                            peakSpeed: 46,
                             settle: 0.2,
                             rampEnd: 0.56,
                             holdEnd: 0.84,
-                            peakActivity: 0.88,
-                            speedGain: 0.8
+                            peakActivity: 0.88
                         });
-                        const driveStartFrame = Math.round(frameCount * 0.26);
-                        const tactileState = drive.activity < 0.52
+                        const tactileState = signal.activity < 0.52
                             ? inactiveTactile
                             : {
                                 mode: 'contact',
-                                assist: Math.round(this.lerp(18, 42, Math.min(1, (drive.activity - 0.52) / 0.32))),
+                                assist: Math.round(this.lerp(18, 42, Math.min(1, (signal.activity - 0.52) / 0.32))),
                                 contacts: 2
                             };
                         return makeDriveFrame(
                             'key-grasp',
-                            drive,
+                            signal,
                             tactileState,
-                            [
-                                ...(frameIndex === 0 ? [{ type: 'mode_switch', value: 'key-grasp' }] : []),
-                                ...(frameIndex === driveStartFrame ? [{ type: 'drive_start', value: 'close' }] : [])
-                            ]
+                            frameIndex === 0 ? [{ type: 'mode_switch', value: 'key-grasp' }] : []
                         );
                     }),
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
                             peakOpen: 48,
                             supportClose: 6,
-                            peakSpeed: 38,
                             settle: 0.1,
                             rampEnd: 0.46,
                             holdEnd: 0.72,
                             peakActivity: 0.72,
-                            speedGain: 0.74,
                             holdDrift: 0.024,
                             tailFloor: 0.02
                         });
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
-                        const tactileState = t < 0.22 && drive.activity > 0.42
+                        const tactileState = t < 0.22 && signal.activity > 0.42
                             ? {
                                 mode: 'contact',
                                 assist: Math.round(this.lerp(20, 10, Math.min(1, t / 0.22))),
@@ -2084,14 +2066,8 @@
                             : inactiveTactile;
                         return makeDriveFrame(
                             'key-grasp',
-                            drive,
-                            tactileState,
-                            frameIndex === 0
-                                ? [
-                                    { type: 'drive_stop', value: 'close' },
-                                    { type: 'drive_start', value: 'open' }
-                                ]
-                                : []
+                            signal,
+                            tactileState
                         );
                     }),
                     ...this.withTelemetry(
@@ -2099,7 +2075,6 @@
                         neutralTelemetry,
                         inactiveTactile,
                         [
-                            this.makeEventLine('drive_stop', 'open'),
                             this.makeEventLine('mode_switch', 'open-hand')
                         ]
                     ),
@@ -2111,25 +2086,22 @@
                     ...this.createDemoGestureCue('THREE_FINGER_PINCH'),
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             peakClose: 50,
                             supportOpen: 8,
-                            peakSpeed: 40,
                             settle: 0.2,
                             rampEnd: 0.58,
                             holdEnd: 0.86,
-                            peakActivity: 0.86,
-                            speedGain: 0.78
+                            peakActivity: 0.86
                         });
-                        const driveStartFrame = Math.round(frameCount * 0.26);
                         let tactileState = inactiveTactile;
-                        if (drive.activity >= 0.38 && t < 0.58) {
+                        if (signal.activity >= 0.38 && t < 0.58) {
                             tactileState = {
                                 mode: 'contact',
-                                assist: Math.round(this.lerp(22, 36, Math.min(1, (drive.activity - 0.38) / 0.22))),
+                                assist: Math.round(this.lerp(22, 36, Math.min(1, (signal.activity - 0.38) / 0.22))),
                                 contacts: 3
                             };
-                        } else if (t >= 0.58 && drive.activity >= 0.7) {
+                        } else if (t >= 0.58 && signal.activity >= 0.7) {
                             tactileState = {
                                 mode: 'holding',
                                 assist: Math.round(this.lerp(38, 58, Math.min(1, (t - 0.58) / 0.18))),
@@ -2138,37 +2110,32 @@
                         }
                         return makeDriveFrame(
                             'tripod-grasp',
-                            drive,
+                            signal,
                             tactileState,
-                            [
-                                ...(frameIndex === 0 ? [{ type: 'mode_switch', value: 'tripod-grasp' }] : []),
-                                ...(frameIndex === driveStartFrame ? [{ type: 'drive_start', value: 'close' }] : [])
-                            ]
+                            frameIndex === 0 ? [{ type: 'mode_switch', value: 'tripod-grasp' }] : []
                         );
                     }),
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
-                        const drive = this.demoDriveTelemetry(frameIndex, frameCount, {
+                        const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
                             peakOpen: 44,
                             supportClose: 6,
-                            peakSpeed: 34,
                             settle: 0.12,
                             rampEnd: 0.48,
                             holdEnd: 0.72,
                             peakActivity: 0.7,
-                            speedGain: 0.72,
                             holdDrift: 0.024,
                             tailFloor: 0.02
                         });
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
                         let tactileState = inactiveTactile;
-                        if (t < 0.18 && drive.activity > 0.48) {
+                        if (t < 0.18 && signal.activity > 0.48) {
                             tactileState = {
                                 mode: 'holding',
                                 assist: Math.round(this.lerp(42, 24, Math.min(1, t / 0.18))),
                                 contacts: 3
                             };
-                        } else if (t < 0.34 && drive.activity > 0.28) {
+                        } else if (t < 0.34 && signal.activity > 0.28) {
                             tactileState = {
                                 mode: 'contact',
                                 assist: Math.round(this.lerp(22, 8, Math.min(1, (t - 0.18) / 0.16))),
@@ -2177,14 +2144,8 @@
                         }
                         return makeDriveFrame(
                             'tripod-grasp',
-                            drive,
-                            tactileState,
-                            frameIndex === 0
-                                ? [
-                                    { type: 'drive_stop', value: 'close' },
-                                    { type: 'drive_start', value: 'open' }
-                                ]
-                                : []
+                            signal,
+                            tactileState
                         );
                     }),
                     ...this.withTelemetry(
@@ -2192,7 +2153,6 @@
                         neutralTelemetry,
                         inactiveTactile,
                         [
-                            this.makeEventLine('drive_stop', 'open'),
                             this.makeEventLine('mode_switch', 'open-hand')
                         ]
                     ),
@@ -2209,12 +2169,27 @@
                 return [[`DEMO_GESTURE ${name}`]];
             }
 
-            withTelemetry(frames, telemetryBundle, tactileState, firstFrameEvents = []) {
-                return frames.map((frame, index) => [
-                    ...this.makeTelemetryLines(telemetryBundle, tactileState),
-                    ...(index === 0 ? firstFrameEvents : []),
-                    ...frame
-                ]);
+            withTelemetry(frames, telemetrySource, tactileState, firstFrameEvents = []) {
+                return frames.map((frame, index) => {
+                    const telemetry = typeof telemetrySource === 'function'
+                        ? telemetrySource(index, frames.length)
+                        : {
+                            telemetryBundle: telemetrySource,
+                            tactileState,
+                            events: []
+                        };
+                    const eventLines = [
+                        ...(index === 0 ? firstFrameEvents : []),
+                        ...((telemetry.events || []).map((event) =>
+                            typeof event === 'string' ? event : this.makeEventLine(event.type, event.value)
+                        ))
+                    ];
+                    return [
+                        ...this.makeTelemetryLines(telemetry.telemetryBundle, telemetry.tactileState ?? tactileState),
+                        ...eventLines,
+                        ...frame
+                    ];
+                });
             }
 
             createControlDriveScene(frameCount, telemetryBuilder) {
@@ -2225,7 +2200,9 @@
                         : telemetryBuilder;
                     frames.push([
                         ...this.makeTelemetryLines(telemetry.telemetryBundle, telemetry.tactileState),
-                        ...((telemetry.events || []).map((event) => this.makeEventLine(event.type, event.value))),
+                        ...((telemetry.events || []).map((event) =>
+                            typeof event === 'string' ? event : this.makeEventLine(event.type, event.value)
+                        )),
                         ...this.makeFrame({
                             fingers: 0,
                             area: 0,
@@ -2237,7 +2214,19 @@
                 return frames;
             }
 
-            demoDriveTelemetry(frameIndex, frameCount, options = {}) {
+            resetDemoEmgPipeline() {
+                this.demoEmgState = {
+                    envelopeCh1: 0,
+                    envelopeCh2: 0,
+                    lastState: 'neutral',
+                    lastDualActivation: false,
+                    lastRequestedSpeed: 0,
+                    lastActiveCommandState: 'neutral',
+                    tickMs: 0
+                };
+            }
+
+            demoEmgSignalProfile(frameIndex, frameCount, options = {}) {
                 const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
                 const direction = String(options.direction || 'close').toLowerCase() === 'open' ? 'open' : 'close';
                 const settle = options.settle ?? 0.16;
@@ -2250,9 +2239,7 @@
                 const supportDrive = direction === 'open'
                     ? (options.supportClose ?? options.supportDrive ?? 6)
                     : (options.supportOpen ?? options.supportDrive ?? 8);
-                const peakSpeed = options.peakSpeed ?? 60;
                 const peakActivity = options.peakActivity ?? 0.9;
-                const speedGain = options.speedGain ?? 0.82;
                 const holdDrift = options.holdDrift ?? 0.035;
                 const tailFloor = options.tailFloor ?? 0.035;
 
@@ -2272,44 +2259,150 @@
                 const modulation = 0.97 + (Math.sin(frameIndex * 0.11) * 0.03);
                 const dominantDrive = Math.round(this.lerp(0, peakDrive, activity * modulation));
                 const support = Math.round(this.lerp(0, supportDrive, activity * 0.92));
-                const close = direction === 'close' ? dominantDrive : support;
-                const open = direction === 'open' ? dominantDrive : support;
-                const speedResponse = Math.min(1, Math.pow(activity, 1.28) * speedGain + (Math.sin(frameIndex * 0.14) * 0.015));
-                const requestedSpeed = Math.max(0, Math.round(this.lerp(0, peakSpeed, speedResponse)));
-                const commandState = activity > 0.08 ? direction : 'neutral';
-
                 return {
                     activity,
-                    openDrive: open,
-                    closeDrive: close,
-                    requestedSpeed,
-                    commandState
+                    openPercent: direction === 'open' ? dominantDrive : support,
+                    closePercent: direction === 'close' ? dominantDrive : support
                 };
             }
 
-            buildEmgTelemetryBundle(modeKey, state, requestedSpeed, openDrive, closeDrive) {
-                const ch1 = Math.max(0, Math.min(100, Math.round(openDrive || 0)));
-                const ch2 = Math.max(0, Math.min(100, Math.round(closeDrive || 0)));
+            buildEmgTelemetryBundle(modeKey, signalProfile = {}) {
+                if (!this.demoEmgState) {
+                    this.resetDemoEmgPipeline();
+                }
+
+                const resolvedModeKey = this.modeCatalog[modeKey] ? modeKey : 'open-hand';
+                const openPercent = Math.max(0, Math.min(100, Math.round(signalProfile.openPercent || 0)));
+                const closePercent = Math.max(0, Math.min(100, Math.round(signalProfile.closePercent || 0)));
                 return {
-                    raw: {
-                        ch1: this.makeSyntheticRawFromPercent(ch1, 0),
-                        ch2: this.makeSyntheticRawFromPercent(ch2, 1)
-                    },
-                    filtered: {
-                        ch1,
-                        ch2
-                    },
-                    drive: {
-                        open: ch1,
-                        close: ch2,
-                        state: state || 'neutral'
-                    },
-                    command: {
-                        modeKey: modeKey || 'open-hand',
-                        state: state || 'neutral',
-                        requestedSpeed: Math.max(0, Math.min(100, Math.round(requestedSpeed || 0)))
-                    }
+                    ...this.runDemoEmgPipeline(resolvedModeKey, openPercent, closePercent),
+                    activity: signalProfile.activity ?? Math.max(openPercent, closePercent) / 100
                 };
+            }
+
+            runDemoEmgPipeline(modeKey, openPercent, closePercent) {
+                const pipeline = this.demoEmgState;
+                const raw = {
+                    ch1: this.makeSyntheticRawFromPercent(openPercent, 0),
+                    ch2: this.makeSyntheticRawFromPercent(closePercent, 1)
+                };
+                const rectifiedCh1 = Math.abs(raw.ch1 - this.demoEmgBaselineCh1);
+                const rectifiedCh2 = Math.abs(raw.ch2 - this.demoEmgBaselineCh2);
+                pipeline.envelopeCh1 = this.demoSmoothEnvelope(pipeline.envelopeCh1, rectifiedCh1);
+                pipeline.envelopeCh2 = this.demoSmoothEnvelope(pipeline.envelopeCh2, rectifiedCh2);
+
+                const filtered = {
+                    ch1: this.demoNormalizeEnvelope(pipeline.envelopeCh1),
+                    ch2: this.demoNormalizeEnvelope(pipeline.envelopeCh2)
+                };
+                const drive = this.demoResolveIntent(filtered.ch1, filtered.ch2);
+                const requestedSpeed = this.demoSynthesizeRequestedSpeed(modeKey, drive.state, filtered.ch1, filtered.ch2);
+                const events = [];
+
+                if (pipeline.lastState === 'neutral' && drive.state !== 'neutral') {
+                    pipeline.lastActiveCommandState = drive.state;
+                    events.push({ type: 'drive_start', value: drive.state });
+                }
+
+                if (!pipeline.lastDualActivation && drive.dualActivation) {
+                    events.push({
+                        type: 'dual_activation',
+                        value: `open${filtered.ch1}_close${filtered.ch2}`
+                    });
+                }
+
+                if (drive.state !== 'neutral') {
+                    pipeline.lastActiveCommandState = drive.state;
+                }
+
+                if (pipeline.lastState !== 'neutral' && drive.state === 'neutral') {
+                    events.push({ type: 'drive_stop', value: pipeline.lastActiveCommandState });
+                }
+
+                pipeline.lastState = drive.state;
+                pipeline.lastDualActivation = drive.dualActivation;
+                pipeline.tickMs += this.demoTickMs;
+
+                return {
+                    telemetryBundle: {
+                        raw,
+                        filtered,
+                        drive: {
+                            open: filtered.ch1,
+                            close: filtered.ch2,
+                            state: drive.state
+                        },
+                        command: {
+                            modeKey,
+                            state: drive.state,
+                            requestedSpeed
+                        }
+                    },
+                    events
+                };
+            }
+
+            demoSmoothEnvelope(previous, current) {
+                return Math.max(0, Math.trunc(previous + ((current - previous) / 5)));
+            }
+
+            demoNormalizeEnvelope(value) {
+                if (this.emgNormalizationMax <= 0) {
+                    return 0;
+                }
+                if (value >= this.emgNormalizationMax) {
+                    return 100;
+                }
+                return Math.max(0, Math.min(100, Math.trunc((value * 100) / this.emgNormalizationMax)));
+            }
+
+            demoResolveIntent(openDrive, closeDrive) {
+                const threshold = this.emgActivationThreshold;
+                const hysteresis = this.emgDominanceHysteresis;
+                const openActive = openDrive >= threshold;
+                const closeActive = closeDrive >= threshold;
+                const difference = Math.abs(openDrive - closeDrive);
+                let state = 'neutral';
+                let dualActivation = false;
+
+                if (openActive && closeActive && difference < hysteresis) {
+                    dualActivation = true;
+                } else if (closeActive && closeDrive >= openDrive + hysteresis) {
+                    state = 'close';
+                } else if (openActive && openDrive >= closeDrive + hysteresis) {
+                    state = 'open';
+                }
+
+                return { state, dualActivation };
+            }
+
+            demoSynthesizeRequestedSpeed(modeKey, state, openDrive, closeDrive) {
+                const threshold = this.emgActivationThreshold;
+                const modeCap = this.modeSpeedCaps[modeKey] ?? this.modeSpeedCaps['power-grasp'];
+                const dominantDrive = state === 'open'
+                    ? openDrive
+                    : state === 'close'
+                        ? closeDrive
+                        : 0;
+                let targetSpeed = 0;
+
+                if (state !== 'neutral' && dominantDrive > threshold) {
+                    const normalizedDrive = Math.trunc(((dominantDrive - threshold) * 100) / Math.max(1, 100 - threshold));
+                    targetSpeed = Math.trunc((normalizedDrive * modeCap) / 100);
+                }
+
+                const current = this.demoEmgState.lastRequestedSpeed;
+                let nextSpeed = current;
+                if (current < targetSpeed) {
+                    nextSpeed = Math.min(targetSpeed, current + this.commandRiseStep);
+                } else if (current > targetSpeed) {
+                    nextSpeed = current > this.commandFallStep && (current - this.commandFallStep) > targetSpeed
+                        ? current - this.commandFallStep
+                        : targetSpeed;
+                }
+
+                this.demoEmgState.lastRequestedSpeed = nextSpeed;
+                return nextSpeed;
             }
 
             makeSyntheticRawFromPercent(percent, offset = 0) {
