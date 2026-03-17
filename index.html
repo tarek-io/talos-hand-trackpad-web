@@ -310,7 +310,7 @@
         .behavior-header {
             position: relative;
             display: block;
-            margin-bottom: 2px;
+            margin-bottom: 8px;
         }
 
         .behavior-header > div {
@@ -337,11 +337,14 @@
 
         .behavior-log {
             margin: 0;
-            padding-left: 18px;
+            padding: 14px 14px 14px 34px;
             color: var(--muted);
             height: 104px;
             max-height: 104px;
             overflow-y: auto;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(26, 42, 37, 0.08);
         }
 
         .behavior-log:empty::before,
@@ -427,11 +430,10 @@
         }
 
         .info-box {
-            background: var(--panel);
+            background: rgba(255,255,255,0.9);
             padding: 16px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border-radius: 14px;
+            border: 1px solid rgba(26, 42, 37, 0.08);
         }
 
         .info-box h3 {
@@ -475,16 +477,13 @@
         }
 
         .gesture-panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 0;
         }
 
         .gesture-toolbar {
             position: relative;
             display: block;
-            margin-bottom: 2px;
+            margin-bottom: 8px;
         }
 
         .gesture-toolbar .gesture-title {
@@ -520,11 +519,14 @@
 
         .gesture-log {
             margin: 0;
-            padding-left: 18px;
+            padding: 14px 14px 14px 34px;
             color: var(--muted);
             height: 110px;
             max-height: 110px;
             overflow-y: auto;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(26, 42, 37, 0.08);
         }
 
         .gesture-log li {
@@ -717,6 +719,10 @@
         .emg-source-row {
             display: grid;
             gap: 7px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(26, 42, 37, 0.08);
         }
 
         .emg-source-header {
