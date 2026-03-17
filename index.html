@@ -624,7 +624,8 @@
 
         .command-track-wrap {
             position: relative;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
+            padding-top: 18px;
         }
 
         .command-track {
@@ -664,35 +665,41 @@
 
         .command-threshold-guide {
             position: absolute;
-            top: 2px;
-            bottom: 2px;
-            width: 2px;
+            top: -3px;
+            bottom: -3px;
+            width: 3px;
             transform: translateX(-50%);
             pointer-events: none;
-            z-index: 3;
+            z-index: 4;
         }
 
         .command-threshold-guide-line {
             width: 100%;
             height: 100%;
             border-radius: 999px;
-            background: rgba(180, 83, 9, 0.72);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
+            background: linear-gradient(180deg, rgba(217, 119, 6, 0.98), rgba(180, 83, 9, 0.94));
+            box-shadow:
+                0 0 0 1px rgba(255, 251, 244, 0.9),
+                0 0 0 4px rgba(180, 83, 9, 0.12);
         }
 
         .command-threshold-guide.is-off .command-threshold-guide-line {
-            background: rgba(124, 45, 18, 0.44);
+            background: linear-gradient(180deg, rgba(146, 64, 14, 0.84), rgba(120, 53, 15, 0.8));
+            box-shadow:
+                0 0 0 1px rgba(255, 251, 244, 0.88),
+                0 0 0 4px rgba(120, 53, 15, 0.08);
         }
 
         .command-threshold-guides {
             position: relative;
-            height: 22px;
-            margin-top: 4px;
+            height: 20px;
+            margin-top: 0;
+            pointer-events: none;
         }
 
         .command-threshold-guide-label {
             position: absolute;
-            top: 0;
+            top: -18px;
             transform: translateX(-50%);
             color: rgba(124, 45, 18, 0.88);
             font-size: 9px;
@@ -703,7 +710,7 @@
         }
 
         .command-threshold-guide-label.is-off {
-            top: 10px;
+            top: 8px;
             color: rgba(120, 53, 15, 0.72);
         }
 
