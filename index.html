@@ -765,6 +765,86 @@
             gap: 10px;
         }
 
+        .timeline-toolbar {
+            display: grid;
+            gap: 10px;
+        }
+
+        .timeline-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timeline-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+            box-shadow: 0 8px 18px rgba(24, 33, 31, 0.08);
+        }
+
+        .record-btn {
+            background: linear-gradient(180deg, #d34d42, var(--danger));
+            color: white;
+        }
+
+        .record-btn:hover {
+            background: linear-gradient(180deg, #cf4439, var(--danger-strong));
+        }
+
+        .replay-btn {
+            background: linear-gradient(180deg, #377cf0, var(--sky));
+            color: white;
+        }
+
+        .replay-btn:hover {
+            background: linear-gradient(180deg, #2d70de, var(--sky-strong));
+        }
+
+        .utility-btn {
+            background: linear-gradient(180deg, #14857d, var(--accent));
+            color: white;
+        }
+
+        .utility-btn:hover {
+            background: linear-gradient(180deg, #169088, var(--accent-strong));
+        }
+
+        .timeline-btn:disabled {
+            background: #b8c8c4;
+            color: #eef3f1;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .timeline-status {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .timeline-scrub {
+            display: grid;
+            gap: 6px;
+        }
+
+        .timeline-scrubber {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .timeline-scrub-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
         .timeline-wrap {
             border: 1px solid var(--border-strong);
             border-radius: var(--radius-lg);
@@ -1040,6 +1120,25 @@
 
             <div class="stack-panel timeline-panel">
                 <h3 class="stack-title">Control Timeline</h3>
+                <div class="timeline-toolbar">
+                    <div class="timeline-actions">
+                        <button id="startRecordingBtn" class="timeline-btn record-btn">Start Recording</button>
+                        <button id="stopRecordingBtn" class="timeline-btn disconnect-btn" disabled>Stop Recording</button>
+                        <button id="replaySessionBtn" class="timeline-btn replay-btn" disabled>Replay Session</button>
+                        <button id="pauseReplayBtn" class="timeline-btn clear-btn" disabled>Pause Replay</button>
+                        <button id="exportSessionBtn" class="timeline-btn utility-btn" disabled>Export Session</button>
+                        <button id="importSessionBtn" class="timeline-btn utility-btn">Import Session</button>
+                        <input id="importSessionInput" type="file" accept="application/json,.json" hidden>
+                    </div>
+                    <p id="sessionStatus" class="timeline-status">No session recorded yet.</p>
+                    <div class="timeline-scrub">
+                        <input id="sessionScrubber" class="timeline-scrubber" type="range" min="0" max="1000" value="0" disabled>
+                        <div class="timeline-scrub-meta">
+                            <span id="sessionPositionLabel">00:00.0</span>
+                            <span id="sessionDurationLabel">00:00.0</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="timeline-wrap">
                     <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1160" height="360"></canvas>
                 </div>
@@ -1187,6 +1286,16 @@
                 this.timelineEvents = [];
                 this.timelineMaxSamples = 220;
                 this.timelineMaxEvents = 48;
+                this.isRecording = false;
+                this.recordingStartedAtMs = 0;
+                this.recordedEntries = [];
+                this.currentSession = null;
+                this.isReplayMode = false;
+                this.isReplayPlaying = false;
+                this.replayTimer = null;
+                this.replayStartedAtMs = 0;
+                this.replayOffsetMs = 0;
+                this.replayAppliedIndex = -1;
                 this.behaviorLogMax = 18;
                 this.demoControlFrames = 150;
                 this.lastEmgBehaviorKey = '';
@@ -1247,6 +1356,19 @@
                 document.getElementById('connectBtn').addEventListener('click', () => this.connect());
                 document.getElementById('demoBtn').addEventListener('click', () => this.connectDemo());
                 document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+                document.getElementById('startRecordingBtn').addEventListener('click', () => this.startRecordingSession());
+                document.getElementById('stopRecordingBtn').addEventListener('click', () => this.stopRecordingSession());
+                document.getElementById('replaySessionBtn').addEventListener('click', () => this.startSessionReplay());
+                document.getElementById('pauseReplayBtn').addEventListener('click', () => this.pauseSessionReplay());
+                document.getElementById('exportSessionBtn').addEventListener('click', () => this.exportCurrentSession());
+                document.getElementById('importSessionBtn').addEventListener('click', () => {
+                    const input = document.getElementById('importSessionInput');
+                    if (input) {
+                        input.click();
+                    }
+                });
+                document.getElementById('importSessionInput').addEventListener('change', (event) => this.importSessionFile(event));
+                document.getElementById('sessionScrubber').addEventListener('input', (event) => this.handleScrubberInput(event));
                 const clearGestureBtn = document.getElementById('clearGestureBtn');
                 if (clearGestureBtn) {
                     clearGestureBtn.addEventListener('click', () => this.clearGestureLog());
@@ -1264,10 +1386,14 @@
                 this.ctx.fillStyle = '#1a1a1a';
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 this.drawGrid();
+                this.updateSessionControls();
             }
 
             async connect() {
                 try {
+                    if (this.isReplayMode) {
+                        await this.disconnect();
+                    }
                     if (this.isDemoMode) {
                         await this.stopDemoMode();
                     }
@@ -1286,7 +1412,11 @@
             }
 
             async disconnect() {
+                if (this.isRecording) {
+                    this.stopRecordingSession();
+                }
                 await this.stopDemoMode();
+                this.stopReplayMode();
 
                 if (this.reader) {
                     await this.reader.cancel();
@@ -1314,6 +1444,10 @@
             async connectDemo() {
                 if (this.isDemoMode) {
                     return;
+                }
+
+                if (this.isReplayMode) {
+                    await this.disconnect();
                 }
 
                 if (this.isConnected) {
@@ -1382,6 +1516,343 @@
                     demoBtn.disabled = false;
                     disconnectBtn.disabled = true;
                 }
+                this.updateSessionControls();
+            }
+
+            consumeIncomingLine(line, options = {}) {
+                const {
+                    appendRaw = true,
+                    record = true
+                } = options;
+
+                if (!line) {
+                    return;
+                }
+
+                if (appendRaw) {
+                    this.appendRawLine(line);
+                }
+
+                if (record && this.isRecording && !this.isReplayMode) {
+                    this.recordSessionLine(line);
+                }
+
+                this.processSerialData(line);
+            }
+
+            recordSessionLine(line) {
+                if (!this.isRecording) {
+                    return;
+                }
+
+                this.recordedEntries.push({
+                    offsetMs: Math.max(0, Math.round(performance.now() - this.recordingStartedAtMs)),
+                    line
+                });
+                this.updateSessionControls();
+            }
+
+            startRecordingSession() {
+                if (this.isRecording || !this.isConnected || this.isReplayMode) {
+                    return;
+                }
+
+                this.isRecording = true;
+                this.recordingStartedAtMs = performance.now();
+                this.recordedEntries = [];
+                this.currentSession = null;
+                this.updateSessionControls();
+            }
+
+            stopRecordingSession() {
+                if (!this.isRecording) {
+                    return;
+                }
+
+                this.isRecording = false;
+                this.currentSession = {
+                    version: 1,
+                    createdAt: new Date().toISOString(),
+                    source: this.isDemoMode ? 'demo' : 'serial',
+                    portLabel: this.portLabel,
+                    entries: this.recordedEntries.map((entry) => ({ ...entry }))
+                };
+                this.updateSessionControls();
+            }
+
+            getCurrentSessionDurationMs() {
+                if (!this.currentSession || !Array.isArray(this.currentSession.entries) || this.currentSession.entries.length === 0) {
+                    return 0;
+                }
+
+                return this.currentSession.entries[this.currentSession.entries.length - 1].offsetMs || 0;
+            }
+
+            formatDurationLabel(ms) {
+                const totalTenths = Math.max(0, Math.round(ms / 100));
+                const minutes = Math.floor(totalTenths / 600);
+                const seconds = Math.floor((totalTenths % 600) / 10);
+                const tenths = totalTenths % 10;
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+            }
+
+            updateSessionControls() {
+                const startBtn = document.getElementById('startRecordingBtn');
+                const stopBtn = document.getElementById('stopRecordingBtn');
+                const replayBtn = document.getElementById('replaySessionBtn');
+                const pauseBtn = document.getElementById('pauseReplayBtn');
+                const exportBtn = document.getElementById('exportSessionBtn');
+                const statusEl = document.getElementById('sessionStatus');
+                const scrubber = document.getElementById('sessionScrubber');
+                const positionEl = document.getElementById('sessionPositionLabel');
+                const durationEl = document.getElementById('sessionDurationLabel');
+                const hasSession = !!(this.currentSession && Array.isArray(this.currentSession.entries) && this.currentSession.entries.length > 0);
+                const durationMs = this.getCurrentSessionDurationMs();
+
+                if (startBtn) {
+                    startBtn.disabled = !this.isConnected || this.isRecording || this.isReplayMode;
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = !this.isRecording;
+                }
+                if (replayBtn) {
+                    replayBtn.disabled = !hasSession || this.isRecording || this.isReplayPlaying;
+                }
+                if (pauseBtn) {
+                    pauseBtn.disabled = !this.isReplayPlaying;
+                }
+                if (exportBtn) {
+                    exportBtn.disabled = !hasSession;
+                }
+
+                if (scrubber) {
+                    scrubber.disabled = !hasSession;
+                    if (!hasSession || durationMs <= 0) {
+                        scrubber.value = '0';
+                    } else if (this.isReplayMode) {
+                        scrubber.value = Math.round((Math.max(0, Math.min(durationMs, this.replayOffsetMs)) / durationMs) * 1000).toString();
+                    }
+                }
+
+                if (positionEl) {
+                    positionEl.textContent = this.formatDurationLabel(this.isReplayMode ? this.replayOffsetMs : 0);
+                }
+                if (durationEl) {
+                    durationEl.textContent = this.formatDurationLabel(durationMs);
+                }
+
+                if (statusEl) {
+                    if (this.isRecording) {
+                        statusEl.textContent = `Recording ${this.isDemoMode ? 'demo' : 'live'} telemetry. ${this.recordedEntries.length} lines captured.`;
+                    } else if (this.isReplayPlaying) {
+                        statusEl.textContent = `Replaying recorded session from ${this.currentSession?.source || 'session'} data.`;
+                    } else if (this.isReplayMode && hasSession) {
+                        statusEl.textContent = `Replay paused at ${this.formatDurationLabel(this.replayOffsetMs)}.`;
+                    } else if (hasSession) {
+                        statusEl.textContent = `Session ready: ${this.currentSession.entries.length} lines from ${this.currentSession.source}.`;
+                    } else {
+                        statusEl.textContent = 'No session recorded yet.';
+                    }
+                }
+            }
+
+            resetInterfaceForReplay() {
+                this.clearTrail();
+                this.clearPalmDiagnostics();
+                this.clearSerialLog();
+                this.clearGestureLog();
+                this.clearBehaviorLog();
+                this.resetTelemetryPanels();
+                this.resetControllerState();
+                this.renderEmgDrive();
+                this.renderTactileState();
+                this.renderBehaviorMonitor();
+            }
+
+            populateSerialPreviewFromSession(targetIndex) {
+                const entries = this.currentSession?.entries || [];
+                const endIndex = Math.max(-1, Math.min(entries.length - 1, targetIndex));
+                const startIndex = Math.max(0, endIndex - 80);
+
+                this.clearSerialLog();
+                for (let i = startIndex; i <= endIndex; i++) {
+                    this.appendRawLine(entries[i].line);
+                }
+            }
+
+            seekSessionToOffset(targetOffsetMs) {
+                const entries = this.currentSession?.entries || [];
+                let targetIndex = -1;
+
+                this.resetInterfaceForReplay();
+
+                for (let i = 0; i < entries.length; i++) {
+                    if (entries[i].offsetMs > targetOffsetMs) {
+                        break;
+                    }
+                    this.consumeIncomingLine(entries[i].line, { appendRaw: false, record: false });
+                    targetIndex = i;
+                }
+
+                this.replayAppliedIndex = targetIndex;
+                this.replayOffsetMs = targetOffsetMs;
+                this.populateSerialPreviewFromSession(targetIndex);
+                this.updateSessionControls();
+            }
+
+            beginReplayTimer() {
+                const durationMs = this.getCurrentSessionDurationMs();
+                const entries = this.currentSession?.entries || [];
+
+                if (!entries.length) {
+                    return;
+                }
+
+                this.isReplayPlaying = true;
+                this.replayStartedAtMs = performance.now() - this.replayOffsetMs;
+                this.updateSessionControls();
+
+                this.replayTimer = window.setInterval(() => {
+                    const targetOffsetMs = Math.max(0, performance.now() - this.replayStartedAtMs);
+
+                    while ((this.replayAppliedIndex + 1) < entries.length &&
+                           entries[this.replayAppliedIndex + 1].offsetMs <= targetOffsetMs) {
+                        this.replayAppliedIndex += 1;
+                        this.consumeIncomingLine(entries[this.replayAppliedIndex].line, { appendRaw: true, record: false });
+                    }
+
+                    this.replayOffsetMs = Math.min(durationMs, targetOffsetMs);
+                    this.updateSessionControls();
+
+                    if (targetOffsetMs >= durationMs) {
+                        this.pauseSessionReplay();
+                    }
+                }, 16);
+            }
+
+            stopReplayTimer() {
+                if (this.replayTimer) {
+                    window.clearInterval(this.replayTimer);
+                    this.replayTimer = null;
+                }
+                this.isReplayPlaying = false;
+            }
+
+            async startSessionReplay() {
+                const durationMs = this.getCurrentSessionDurationMs();
+
+                if (!this.currentSession || !Array.isArray(this.currentSession.entries) || this.currentSession.entries.length === 0) {
+                    return;
+                }
+
+                if (this.isConnected && !this.isReplayMode) {
+                    await this.disconnect();
+                }
+
+                if (!this.isReplayMode) {
+                    this.isReplayMode = true;
+                    this.isConnected = true;
+                    this.portLabel = 'recorded session';
+                    this.updateConnectionStatus(true, 'Connected - Replaying recorded session');
+                    this.replayOffsetMs = 0;
+                    this.replayAppliedIndex = -1;
+                    this.seekSessionToOffset(0);
+                } else if (this.replayOffsetMs >= durationMs) {
+                    this.seekSessionToOffset(0);
+                }
+
+                this.beginReplayTimer();
+            }
+
+            pauseSessionReplay() {
+                if (!this.isReplayMode) {
+                    return;
+                }
+
+                this.stopReplayTimer();
+                this.updateSessionControls();
+            }
+
+            stopReplayMode() {
+                this.stopReplayTimer();
+                this.isReplayMode = false;
+                this.replayOffsetMs = 0;
+                this.replayAppliedIndex = -1;
+            }
+
+            handleScrubberInput(event) {
+                const scrubber = event?.target;
+                const durationMs = this.getCurrentSessionDurationMs();
+                if (!scrubber || !this.currentSession || durationMs <= 0) {
+                    return;
+                }
+
+                if (!this.isReplayMode) {
+                    this.isReplayMode = true;
+                    this.isConnected = true;
+                    this.portLabel = 'recorded session';
+                    this.updateConnectionStatus(true, 'Connected - Replaying recorded session');
+                }
+
+                this.pauseSessionReplay();
+                this.seekSessionToOffset((parseInt(scrubber.value, 10) / 1000) * durationMs);
+            }
+
+            exportCurrentSession() {
+                if (!this.currentSession) {
+                    return;
+                }
+
+                const blob = new Blob([JSON.stringify(this.currentSession, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = `talos-hand-session-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+                anchor.click();
+                URL.revokeObjectURL(url);
+            }
+
+            async importSessionFile(event) {
+                const file = event?.target?.files?.[0];
+                if (!file) {
+                    return;
+                }
+
+                try {
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+
+                    if (!parsed || !Array.isArray(parsed.entries)) {
+                        throw new Error('Session file is missing an entries array.');
+                    }
+
+                    this.currentSession = {
+                        version: parsed.version || 1,
+                        createdAt: parsed.createdAt || new Date().toISOString(),
+                        source: parsed.source || 'imported',
+                        portLabel: parsed.portLabel || 'imported session',
+                        entries: parsed.entries
+                            .filter((entry) => entry && typeof entry.line === 'string')
+                            .map((entry) => ({
+                                offsetMs: Math.max(0, Number(entry.offsetMs) || 0),
+                                line: entry.line
+                            }))
+                            .sort((a, b) => a.offsetMs - b.offsetMs)
+                    };
+
+                    this.recordedEntries = [];
+                    this.updateSessionControls();
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    const statusEl = document.getElementById('sessionStatus');
+                    if (statusEl) {
+                        statusEl.textContent = `Import failed: ${error.message}`;
+                    }
+                } finally {
+                    if (event?.target) {
+                        event.target.value = '';
+                    }
+                }
             }
 
             async startReading() {
@@ -1405,8 +1876,7 @@
                             if (!trimmed) {
                                 continue;
                             }
-                            this.appendRawLine(trimmed);
-                            this.processSerialData(trimmed);
+                            this.consumeIncomingLine(trimmed);
                         }
                     }
                 } catch (error) {
@@ -1425,8 +1895,7 @@
 
                     const frame = scriptedFrames[this.demoFrameIndex];
                     frame.forEach((line) => {
-                        this.appendRawLine(line);
-                        this.processSerialData(line);
+                        this.consumeIncomingLine(line);
                     });
 
                     this.demoFrameIndex += 1;
