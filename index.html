@@ -541,7 +541,7 @@
                 <div class="mode-copy-wrap">
                     <p class="mode-eyebrow">Current Mode</p>
                     <h2 id="modeName" class="mode-name">Standby</h2>
-                    <p id="modeSummary" class="mode-summary">Waiting for the next gesture. Demo mode and live serial both drive this panel, so the interface can be designed without hardware.</p>
+                    <p id="modeSummary" class="mode-summary" style="display: none;"></p>
                 </div>
             </div>
 
@@ -685,7 +685,7 @@
                     idle: {
                         name: 'Standby',
                         accent: '#0f766e',
-                        summary: 'Waiting for the next gesture. Demo mode and live serial both drive this panel, so the interface can be designed without hardware.'
+                        summary: ''
                     },
                     'power-grasp': {
                         name: 'Power Grasp',
@@ -1253,9 +1253,11 @@
 
             renderControllerState() {
                 const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
+                const summaryEl = document.getElementById('modeSummary');
 
                 document.getElementById('modeName').textContent = mode.name;
-                document.getElementById('modeSummary').textContent = mode.summary;
+                summaryEl.textContent = mode.summary;
+                summaryEl.style.display = mode.summary ? '' : 'none';
                 const panel = document.getElementById('modePanel');
                 if (panel) {
                     panel.style.setProperty('--mode-accent', mode.accent);
