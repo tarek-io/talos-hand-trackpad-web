@@ -200,8 +200,8 @@
         }
 
         .demo-btn.header-demo-btn {
-            padding: 14px 22px;
-            font-size: 15px;
+            padding: 16px 28px;
+            font-size: 16px;
             letter-spacing: 0.02em;
             box-shadow: 0 14px 28px rgba(15, 118, 110, 0.22);
         }
@@ -367,7 +367,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 18px;
             align-items: start;
         }
@@ -819,7 +819,7 @@
                         <h1>Trackpad Interface</h1>
                     </div>
                     <div class="page-header-actions">
-                        <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode</button>
+                        <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode with Simulated Data</button>
                         <p class="demo-help">Runs a realistic simulated input stream for previewing the interface without hardware.</p>
                     </div>
                 </div>
@@ -837,7 +837,7 @@
                 <button id="disconnectBtn" class="disconnect-btn" disabled>Disconnect</button>
             </div>
 
-            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for simulated input</div>
+            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode with Simulated Data" for preview input</div>
 
             <div class="dashboard-grid">
                 <div class="dashboard-main">
@@ -1279,7 +1279,7 @@
                     disconnectBtn.disabled = false;
                 } else {
                     statusEl.className = 'status disconnected';
-                    statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for simulated input';
+                statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode with Simulated Data" for preview input';
                     connectBtn.disabled = !this.webSerialSupported;
                     demoBtn.disabled = false;
                     disconnectBtn.disabled = true;
