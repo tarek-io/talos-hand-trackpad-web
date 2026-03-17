@@ -1952,6 +1952,12 @@
                 this.resetDemoEmgPipeline();
                 const inactiveTactile = { mode: 'inactive', assist: 0, contacts: 0 };
                 const releaseFrames = this.demoReleaseFrames;
+                const datasetProfiles = {
+                    openDominant: { peakOpen: 42, supportClose: 4 },
+                    closeDominant: { peakClose: 55, supportOpen: 30 },
+                    closeModerate: { peakClose: 46, supportOpen: 24 },
+                    closePrecision: { peakClose: 40, supportOpen: 18 }
+                };
                 const neutralTelemetry = () => ({
                     ...this.buildEmgTelemetryBundle('open-hand', { openPercent: 0, closePercent: 0, activity: 0 }),
                     tactileState: inactiveTactile
@@ -1974,8 +1980,7 @@
                     ...this.createDemoGestureCue('TWO_FINGER_SWIPE'),
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
-                            peakClose: 76,
-                            supportOpen: 6,
+                            ...datasetProfiles.closeDominant,
                             settle: 0.18,
                             rampEnd: 0.54,
                             holdEnd: 0.82,
@@ -1991,8 +1996,7 @@
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
-                            peakOpen: 58,
-                            supportClose: 5,
+                            ...datasetProfiles.openDominant,
                             settle: 0.1,
                             rampEnd: 0.44,
                             holdEnd: 0.7,
@@ -2023,8 +2027,7 @@
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
-                            peakClose: 56,
-                            supportOpen: 10,
+                            ...datasetProfiles.closeModerate,
                             settle: 0.2,
                             rampEnd: 0.56,
                             holdEnd: 0.84,
@@ -2047,8 +2050,7 @@
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
-                            peakOpen: 48,
-                            supportClose: 6,
+                            ...datasetProfiles.openDominant,
                             settle: 0.1,
                             rampEnd: 0.46,
                             holdEnd: 0.72,
@@ -2087,8 +2089,7 @@
                     ...this.createControlDriveScene(this.demoControlFrames, (frameIndex, frameCount) => {
                         const t = frameCount <= 1 ? 1 : frameIndex / (frameCount - 1);
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
-                            peakClose: 50,
-                            supportOpen: 8,
+                            ...datasetProfiles.closePrecision,
                             settle: 0.2,
                             rampEnd: 0.58,
                             holdEnd: 0.86,
@@ -2118,8 +2119,7 @@
                     ...this.createControlDriveScene(releaseFrames, (frameIndex, frameCount) => {
                         const signal = this.demoEmgSignalProfile(frameIndex, frameCount, {
                             direction: 'open',
-                            peakOpen: 44,
-                            supportClose: 6,
+                            ...datasetProfiles.openDominant,
                             settle: 0.12,
                             rampEnd: 0.48,
                             holdEnd: 0.72,
