@@ -621,8 +621,15 @@
             top: 2px;
             bottom: 2px;
             border-radius: 999px;
-            background: linear-gradient(180deg, rgba(15, 118, 110, 0.95), rgba(11, 95, 89, 0.92));
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+
+        .command-fill-open {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.94), rgba(37, 99, 235, 0.9));
+        }
+
+        .command-fill-close {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.94), rgba(15, 118, 110, 0.9));
         }
 
         .command-axis-labels {
@@ -751,7 +758,7 @@
 
         .adaptive-metrics {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
 
@@ -1226,7 +1233,8 @@
                             </div>
                         <div class="command-track-wrap">
                             <div class="command-track">
-                                <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
+                                <div id="commandFillOpen" class="command-fill command-fill-open" style="left: 50%; width: 0%;"></div>
+                                <div id="commandFillClose" class="command-fill command-fill-close" style="left: 50%; width: 0%;"></div>
                                 <div class="command-center-line"></div>
                             </div>
                                 <div class="command-axis-labels">
@@ -1276,7 +1284,7 @@
                             </div>
                         </div>
                         <div class="timeline-wrap">
-                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="960"></canvas>
+                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="1000"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1306,10 +1314,6 @@
 
                                 <div class="adaptive-metrics">
                                     <div class="adaptive-metric">
-                                        <p class="adaptive-metric-label">Assist</p>
-                                        <p id="adaptiveAssist" class="adaptive-metric-value">0%</p>
-                                    </div>
-                                    <div class="adaptive-metric">
                                         <p class="adaptive-metric-label">Contacts</p>
                                         <p id="adaptiveContacts" class="adaptive-metric-value">0</p>
                                     </div>
@@ -1336,7 +1340,7 @@
 
                                 <div class="adaptive-response-grid">
                                     <div class="adaptive-response-card">
-                                        <p class="adaptive-response-label">Assist Bias</p>
+                                        <p class="adaptive-response-label">Support Bias</p>
                                         <p id="adaptiveHoldBias" class="adaptive-response-value">0%</p>
                                     </div>
                                     <div class="adaptive-response-card">
@@ -3387,13 +3391,14 @@
 
             renderEmgDrive() {
                 const stateEl = document.getElementById('commandState');
-                const fillEl = document.getElementById('commandFill');
+                const openFillEl = document.getElementById('commandFillOpen');
+                const closeFillEl = document.getElementById('commandFillClose');
                 const speedCapValueEl = document.getElementById('commandSpeedCapValue');
                 const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
                 const speedCapFillEl = document.getElementById('commandSpeedCapFill');
                 const speedFillEl = document.getElementById('commandSpeedFill');
 
-                if (!stateEl || !fillEl || !speedCapValueEl ||
+                if (!stateEl || !openFillEl || !closeFillEl || !speedCapValueEl ||
                     !speedAxisValueEl || !speedCapFillEl || !speedFillEl) {
                     return;
                 }
@@ -3413,24 +3418,17 @@
                 const closeValue = Math.max(0, Math.min(100, this.emgDrive.close || 0));
                 const speed = this.getRequestedSpeed();
                 const modeCap = Math.max(0, Math.min(100, this.modeSpeedCaps[speedModeKey] ?? this.modeSpeedCaps['power-grasp']));
-                const command = displayState === 'open'
-                    ? -openValue
-                    : displayState === 'close'
-                        ? closeValue
-                        : 0;
-                const magnitude = Math.abs(command);
-
                 stateEl.textContent = stateMap[displayState] || 'Neutral';
                 speedCapValueEl.textContent = `Mode ceiling ${modeCap}%`;
                 speedAxisValueEl.textContent = `${speed}% live`;
 
-                fillEl.style.width = `${magnitude}%`;
-                fillEl.style.left = command >= 0 ? '50%' : `calc(50% - ${magnitude}%)`;
-                fillEl.style.background = displayState === 'open'
-                    ? 'linear-gradient(180deg, rgba(37, 99, 235, 0.95), rgba(30, 78, 199, 0.92))'
-                    : displayState === 'close'
-                        ? 'linear-gradient(180deg, rgba(15, 118, 110, 0.95), rgba(11, 95, 89, 0.92))'
-                        : 'linear-gradient(180deg, rgba(140, 152, 147, 0.6), rgba(109, 120, 116, 0.6))';
+                openFillEl.style.width = `${openValue}%`;
+                openFillEl.style.left = `calc(50% - ${openValue}%)`;
+                openFillEl.style.opacity = displayState === 'open' ? '1' : (displayState === 'neutral' ? '0.75' : '0.45');
+
+                closeFillEl.style.width = `${closeValue}%`;
+                closeFillEl.style.left = '50%';
+                closeFillEl.style.opacity = displayState === 'close' ? '1' : (displayState === 'neutral' ? '0.75' : '0.45');
 
                 speedCapFillEl.style.width = `${modeCap}%`;
                 speedFillEl.style.width = `${Math.min(speed, modeCap)}%`;
@@ -3440,7 +3438,6 @@
             renderTactileState() {
                 const stateEl = document.getElementById('adaptiveState');
                 const badgeEl = document.getElementById('adaptiveBadge');
-                const assistEl = document.getElementById('adaptiveAssist');
                 const contactsEl = document.getElementById('adaptiveContacts');
                 const phaseEl = document.getElementById('adaptivePhase');
                 const summaryEl = document.getElementById('adaptiveSummary');
@@ -3451,7 +3448,7 @@
                 const slipGuardEl = document.getElementById('adaptiveSlipGuard');
                 const leadFingersEl = document.getElementById('adaptiveLeadFingers');
 
-                if (!stateEl || !badgeEl || !assistEl || !contactsEl || !phaseEl || !summaryEl ||
+                if (!stateEl || !badgeEl || !contactsEl || !phaseEl || !summaryEl ||
                     !patternEl || !fingerGridEl || !responseModeEl || !holdBiasEl ||
                     !slipGuardEl || !leadFingersEl) {
                     return;
@@ -3460,7 +3457,6 @@
                 const panelModel = this.buildAdaptivePanelModel();
                 stateEl.textContent = panelModel.stateLabel;
                 badgeEl.textContent = panelModel.badgeLabel;
-                assistEl.textContent = `${panelModel.assist}%`;
                 contactsEl.textContent = `${panelModel.contacts}`;
                 phaseEl.textContent = panelModel.phaseLabel;
                 summaryEl.textContent = panelModel.summary;
