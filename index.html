@@ -642,6 +642,7 @@
                 this.threeFingerSwipeDominanceRatio = 0.8;
                 this.gestureLogMax = 20;
                 this.currentFingerCount = 0;
+                this.idleLatched = false;
                 this.pendingTap = {
                     fingerCount: 0,
                     lastTapTs: 0
@@ -1474,6 +1475,12 @@
             }
 
             handleIdleFrame() {
+                if (this.idleLatched) {
+                    this.clearTouchInfo();
+                    return;
+                }
+
+                this.idleLatched = true;
                 this.finalizeThreeFingerStroke();
                 this.finalizeTwoFingerStroke();
                 this.finalizePrimaryStroke();
@@ -1529,6 +1536,7 @@
             }
 
             updateSingleTouch(rawX, rawY, strength) {
+                this.idleLatched = false;
                 this.updateTouchInfo([{ x: rawX, y: rawY, strength }]);
 
                 this.pushTouch(this.touchHistory1, rawX, rawY, strength);
@@ -1553,6 +1561,7 @@
             }
 
             updateDualTouch(x1, y1, s1, x2, y2, s2) {
+                this.idleLatched = false;
                 const contacts = this.sortContactsByX([
                     { x: x1, y: y1, strength: s1 },
                     { x: x2, y: y2, strength: s2 }
@@ -1600,6 +1609,7 @@
             }
 
             updateTripleTouch(x1, y1, s1, x2, y2, s2, x3, y3, s3) {
+                this.idleLatched = false;
                 const contacts = this.sortContactsByX([
                     { x: x1, y: y1, strength: s1 },
                     { x: x2, y: y2, strength: s2 },
@@ -1928,6 +1938,7 @@
                 this.threeFingerStroke.active = false;
                 this.pendingTap.fingerCount = 0;
                 this.pendingTap.lastTapTs = 0;
+                this.idleLatched = false;
                 this.currentFingerCount = 0;
                 this.clearTouchInfo();
             }
