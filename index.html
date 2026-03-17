@@ -924,17 +924,26 @@
             buildDemoFrames() {
                 return [
                     ...this.createPinchScene(2, 260, 320, 600, 320, 38),
+                    ...this.createDemoGestureCue('TWO_FINGER_PINCH'),
                     ...this.createIdleScene(10),
                     ...this.createSpreadScene(2, 360, 320, 500, 320, 38),
+                    ...this.createDemoGestureCue('TWO_FINGER_SPREAD'),
                     ...this.createIdleScene(10),
                     ...this.createSwipeScene(3, 260, 460, 620, 460, 42),
+                    ...this.createDemoGestureCue('THREE_FINGER_SWIPE'),
                     ...this.createIdleScene(10),
                     ...this.createPinchScene(3, 240, 420, 640, 420, 40),
+                    ...this.createDemoGestureCue('THREE_FINGER_PINCH'),
                     ...this.createIdleScene(10),
                     ...this.createSpreadScene(3, 360, 430, 510, 430, 40),
+                    ...this.createDemoGestureCue('THREE_FINGER_SPREAD'),
                     ...this.createIdleScene(10),
                     ...this.createPalmScene(12)
                 ];
+            }
+
+            createDemoGestureCue(name) {
+                return [[`DEMO_GESTURE ${name}`]];
             }
 
             createIdleScene(frameCount) {
@@ -1315,6 +1324,12 @@
 
             processSerialData(data) {
                 if (!data) return;
+                if (data.startsWith('DEMO_GESTURE ')) {
+                    if (this.isDemoMode) {
+                        this.emitDemoGesture(data.replace('DEMO_GESTURE ', '').trim());
+                    }
+                    return;
+                }
                 if (data.startsWith('alive ')) {
                     const diagMatch = data.match(/fingers=(\d+)\s+area=(\d+)\s+palm=(\d+)/);
                     if (diagMatch) {
@@ -1622,6 +1637,10 @@
 
             finalizeTwoFingerStroke() {
                 if (!this.twoFingerStroke.active) return;
+                if (this.isDemoMode) {
+                    this.twoFingerStroke.active = false;
+                    return;
+                }
 
                 const dx = this.twoFingerStroke.lastCenterX - this.twoFingerStroke.startCenterX;
                 const dy = this.twoFingerStroke.lastCenterY - this.twoFingerStroke.startCenterY;
@@ -1668,6 +1687,10 @@
 
             finalizeThreeFingerStroke() {
                 if (!this.threeFingerStroke.active) return;
+                if (this.isDemoMode) {
+                    this.threeFingerStroke.active = false;
+                    return;
+                }
 
                 const dx = this.threeFingerStroke.lastCenterX - this.threeFingerStroke.startCenterX;
                 const dy = this.threeFingerStroke.lastCenterY - this.threeFingerStroke.startCenterY;
@@ -1697,6 +1720,17 @@
                 const ts = new Date().toLocaleTimeString();
                 const detail = `d=${Math.round(distance)} t=${Math.round(duration)}ms`;
 
+                this.applyGestureToUI(currentEl, logEl, ts, name, detail);
+            }
+
+            emitDemoGesture(name) {
+                const currentEl = document.getElementById('gestureCurrent');
+                const logEl = document.getElementById('gestureLog');
+                const ts = new Date().toLocaleTimeString();
+                this.applyGestureToUI(currentEl, logEl, ts, name, 'demo');
+            }
+
+            applyGestureToUI(currentEl, logEl, ts, name, detail) {
                 currentEl.textContent = `${name} (${detail})`;
 
                 const li = document.createElement('li');
