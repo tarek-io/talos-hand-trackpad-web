@@ -1420,7 +1420,7 @@
                                     <h3 id="adaptiveState" class="adaptive-state">Inactive</h3>
                                     <div id="adaptiveBadge" class="adaptive-badge">Awaiting data</div>
                                 </div>
-                                <p id="adaptiveSummary" class="adaptive-summary">Awaiting tactile feedback.</p>
+                                <p id="adaptiveSummary" class="adaptive-summary"></p>
 
                                 <div class="adaptive-metrics">
                                     <div class="adaptive-metric">
@@ -3745,6 +3745,7 @@
                 contactsEl.textContent = `${panelModel.contacts}`;
                 phaseEl.textContent = panelModel.phaseLabel;
                 summaryEl.textContent = panelModel.summary;
+                summaryEl.style.display = panelModel.summary ? '' : 'none';
                 patternEl.textContent = panelModel.patternLabel;
                 responseModeEl.textContent = panelModel.responseMode;
                 holdBiasEl.textContent = `${panelModel.assistBias}%`;
@@ -3863,8 +3864,8 @@
                 };
                 const summaryMap = {
                     inactive: available
-                        ? `Watching ${mode.name} for contact.`
-                        : 'Awaiting tactile feedback.',
+                        ? ''
+                        : '',
                     contact: `Contact detected in ${mode.name}.`,
                     holding: `${mode.name}: hold stabilized.`,
                     slip: `${mode.name}: slip correction active.`,
