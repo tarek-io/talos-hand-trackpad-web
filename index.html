@@ -181,18 +181,18 @@
         }
 
         .pause-btn {
-            background: linear-gradient(180deg, #f2a63b, #d97706);
+            background: linear-gradient(180deg, #377cf0, var(--sky));
             color: white;
-            border-color: rgba(180, 83, 9, 0.22);
+            border-color: rgba(37, 99, 235, 0.22);
         }
 
         .pause-btn:hover {
-            background: linear-gradient(180deg, #f5af4d, #c76d05);
+            background: linear-gradient(180deg, #2d70de, var(--sky-strong));
         }
 
         .pause-btn.is-active {
-            background: linear-gradient(180deg, #f6b25a, #b45309);
-            box-shadow: 0 12px 24px rgba(180, 83, 9, 0.2);
+            background: linear-gradient(180deg, #377cf0, var(--sky));
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
         }
 
         .pause-btn:disabled {
@@ -1252,7 +1252,7 @@
 
             <div class="controls">
                 <button id="connectBtn" class="connect-btn">Connect to Serial</button>
-                <button id="pauseBtn" class="pause-btn" disabled>Pause Dashboard</button>
+                <button id="pauseBtn" class="pause-btn" disabled>Pause</button>
                 <button id="disconnectBtn" class="disconnect-btn" disabled>Disconnect</button>
             </div>
 
@@ -1869,7 +1869,7 @@
                     demoBtn.disabled = true;
                     if (pauseBtn) {
                         pauseBtn.disabled = false;
-                        pauseBtn.textContent = this.isDashboardPaused ? 'Resume Dashboard' : 'Pause Dashboard';
+                        pauseBtn.textContent = this.isDashboardPaused ? 'Resume' : 'Pause';
                         pauseBtn.classList.toggle('is-active', this.isDashboardPaused);
                     }
                     disconnectBtn.disabled = false;
@@ -1880,7 +1880,7 @@
                     demoBtn.disabled = false;
                     if (pauseBtn) {
                         pauseBtn.disabled = true;
-                        pauseBtn.textContent = 'Pause Dashboard';
+                        pauseBtn.textContent = 'Pause';
                         pauseBtn.classList.remove('is-active');
                     }
                     disconnectBtn.disabled = true;
