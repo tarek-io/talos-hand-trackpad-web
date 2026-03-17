@@ -1815,14 +1815,15 @@
                 const currentEl = document.getElementById('gestureCurrent');
                 const logEl = document.getElementById('gestureLog');
                 const ts = new Date().toLocaleTimeString();
-                this.applyGestureToUI(currentEl, logEl, ts, name, 'demo');
+                this.applyGestureToUI(currentEl, logEl, ts, name, '');
             }
 
             applyGestureToUI(currentEl, logEl, ts, name, detail) {
-                currentEl.textContent = `${name} (${detail})`;
+                const suffix = detail ? ` (${detail})` : '';
+                currentEl.textContent = `${name}${suffix}`;
 
                 const li = document.createElement('li');
-                li.textContent = `${ts} - ${name} (${detail})`;
+                li.textContent = `${ts} - ${name}${suffix}`;
                 logEl.prepend(li);
 
                 this.controllerState.modeKey = this.modeKeyFromGesture(name);
@@ -1917,11 +1918,12 @@
                 const latestAge = now - latest.timestamp;
                 const latestMaxAge = latest.releaseGhost ? (latest.releaseFadeMs || this.releaseFadeMs) : this.trailMaxAgeMs;
                 const ringOpacity = Math.max(0, 1 - (latestAge / latestMaxAge));
+                if (ringOpacity <= 0) return;
 
                 this.ctx.save();
                 this.ctx.globalAlpha = ringOpacity;
                 this.ctx.strokeStyle = ringColor;
-                this.ctx.lineWidth = 2;
+                this.ctx.lineWidth = 2 * ringOpacity;
                 this.ctx.beginPath();
                 this.ctx.arc(latest.x, latest.y, this.touchRingSize, 0, Math.PI * 2);
                 this.ctx.stroke();
