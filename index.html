@@ -59,7 +59,7 @@
             padding: 28px;
             box-shadow: var(--shadow);
             border: 1px solid rgba(255, 255, 255, 0.55);
-            max-width: 1920px;
+            max-width: 2160px;
             width: 100%;
         }
 
@@ -387,7 +387,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+            grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
             gap: 20px;
             align-items: start;
         }
@@ -400,13 +400,13 @@
         .dashboard-side {
             min-width: 0;
             display: grid;
-            gap: 14px;
+            gap: 16px;
             align-content: start;
         }
 
         .dashboard-side-top {
             display: grid;
-            grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 14px;
             align-items: start;
         }
@@ -773,8 +773,7 @@
         }
 
         .timeline-toolbar {
-            display: grid;
-            gap: 10px;
+            display: none;
         }
 
         .timeline-actions {
@@ -1111,53 +1110,53 @@
                             </div>
                         </div>
 
-                        <div class="stack-panel timeline-panel analysis-panel">
-                            <h3 class="stack-title">Signal Analysis</h3>
-                            <div class="timeline-toolbar">
-                                <div class="timeline-actions">
-                                    <button id="startRecordingBtn" class="timeline-btn record-btn">Start Recording</button>
-                                    <button id="stopRecordingBtn" class="timeline-btn disconnect-btn" disabled>Stop Recording</button>
-                                    <button id="replaySessionBtn" class="timeline-btn replay-btn" disabled>Replay Session</button>
-                                    <button id="pauseReplayBtn" class="timeline-btn clear-btn" disabled>Pause Replay</button>
-                                    <button id="exportSessionBtn" class="timeline-btn utility-btn" disabled>Export Session</button>
-                                    <button id="importSessionBtn" class="timeline-btn utility-btn">Import Session</button>
-                                    <input id="importSessionInput" type="file" accept="application/json,.json" hidden>
+                        <div class="stack-panel">
+                            <h3 class="stack-title">Adaptive Grasping</h3>
+                            <p class="stack-subtitle">Tactile-state feedback that modifies or stabilizes the commanded grasp after contact.</p>
+
+                            <div class="adaptive-status-card">
+                                <div class="adaptive-state-row">
+                                    <h3 id="adaptiveState" class="adaptive-state">Inactive</h3>
+                                    <div id="adaptiveBadge" class="adaptive-badge">Awaiting data</div>
                                 </div>
-                                <p id="sessionStatus" class="timeline-status">No session recorded yet.</p>
-                                <div class="timeline-scrub">
-                                    <input id="sessionScrubber" class="timeline-scrubber" type="range" min="0" max="1000" value="0" disabled>
-                                    <div class="timeline-scrub-meta">
-                                        <span id="sessionPositionLabel">00:00.0</span>
-                                        <span id="sessionDurationLabel">00:00.0</span>
+
+                                <div class="adaptive-metrics">
+                                    <div class="adaptive-metric">
+                                        <p class="adaptive-metric-label">Assist</p>
+                                        <p id="adaptiveAssist" class="adaptive-metric-value">0%</p>
+                                    </div>
+                                    <div class="adaptive-metric">
+                                        <p class="adaptive-metric-label">Contacts</p>
+                                        <p id="adaptiveContacts" class="adaptive-metric-value">0</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="timeline-wrap">
-                                <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1320" height="620"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stack-panel">
-                        <h3 class="stack-title">Adaptive Grasping</h3>
-                        <p class="stack-subtitle">Tactile-state feedback that modifies or stabilizes the commanded grasp after contact.</p>
-
-                        <div class="adaptive-status-card">
-                            <div class="adaptive-state-row">
-                                <h3 id="adaptiveState" class="adaptive-state">Inactive</h3>
-                                <div id="adaptiveBadge" class="adaptive-badge">Awaiting data</div>
+                    <div class="stack-panel timeline-panel analysis-panel">
+                        <h3 class="stack-title">Signal Analysis</h3>
+                        <div class="timeline-toolbar">
+                            <div class="timeline-actions">
+                                <button id="startRecordingBtn" class="timeline-btn record-btn">Start Recording</button>
+                                <button id="stopRecordingBtn" class="timeline-btn disconnect-btn" disabled>Stop Recording</button>
+                                <button id="replaySessionBtn" class="timeline-btn replay-btn" disabled>Replay Session</button>
+                                <button id="pauseReplayBtn" class="timeline-btn clear-btn" disabled>Pause Replay</button>
+                                <button id="exportSessionBtn" class="timeline-btn utility-btn" disabled>Export Session</button>
+                                <button id="importSessionBtn" class="timeline-btn utility-btn">Import Session</button>
+                                <input id="importSessionInput" type="file" accept="application/json,.json" hidden>
                             </div>
-
-                            <div class="adaptive-metrics">
-                                <div class="adaptive-metric">
-                                    <p class="adaptive-metric-label">Assist</p>
-                                    <p id="adaptiveAssist" class="adaptive-metric-value">0%</p>
-                                </div>
-                                <div class="adaptive-metric">
-                                    <p class="adaptive-metric-label">Contacts</p>
-                                    <p id="adaptiveContacts" class="adaptive-metric-value">0</p>
+                            <p id="sessionStatus" class="timeline-status">No session recorded yet.</p>
+                            <div class="timeline-scrub">
+                                <input id="sessionScrubber" class="timeline-scrubber" type="range" min="0" max="1000" value="0" disabled>
+                                <div class="timeline-scrub-meta">
+                                    <span id="sessionPositionLabel">00:00.0</span>
+                                    <span id="sessionDurationLabel">00:00.0</span>
                                 </div>
                             </div>
+                        </div>
+                        <div class="timeline-wrap">
+                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="780"></canvas>
                         </div>
                     </div>
                 </div>
