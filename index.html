@@ -2410,8 +2410,8 @@
                 let targetSpeed = 0;
 
                 if (state !== 'neutral' && dominantDrive > threshold) {
-                    const normalizedDrive = Math.trunc(((dominantDrive - threshold) * 100) / Math.max(1, 100 - threshold));
-                    targetSpeed = Math.trunc((normalizedDrive * modeCap) / 100);
+                    const responsePercent = this.demoResponsiveDrivePercent(dominantDrive, threshold);
+                    targetSpeed = Math.trunc((responsePercent * modeCap) / 100);
                 }
 
                 const current = this.demoEmgState.lastRequestedSpeed;
@@ -2426,6 +2426,16 @@
 
                 this.demoEmgState.lastRequestedSpeed = nextSpeed;
                 return nextSpeed;
+            }
+
+            demoResponsiveDrivePercent(dominantDrive, threshold) {
+                if (dominantDrive <= threshold || threshold >= 100) {
+                    return 0;
+                }
+
+                const linearPercent = ((dominantDrive - threshold) * 100) / Math.max(1, 100 - threshold);
+                const boostedPercent = (linearPercent + Math.sqrt(linearPercent * 100)) / 2;
+                return Math.max(0, Math.min(100, boostedPercent));
             }
 
             makeSyntheticRawFromPercent(percent, offset = 0) {
