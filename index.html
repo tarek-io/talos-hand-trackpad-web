@@ -3617,13 +3617,13 @@
                 const canvas = this.timelineCanvas;
                 const samples = this.timelineSamples;
                 const lanes = [
-                    { label: 'EMG 1 raw/filtered', key: 'emg1' },
-                    { label: 'EMG 2 raw/filtered', key: 'emg2' },
-                    { label: 'Open Drive', key: 'openDrive' },
-                    { label: 'Close Drive', key: 'closeDrive' },
-                    { label: 'Requested Speed', key: 'requestedSpeed' }
+                    { labelLines: ['EMG 1', 'raw / filtered'], key: 'emg1' },
+                    { labelLines: ['EMG 2', 'raw / filtered'], key: 'emg2' },
+                    { labelLines: ['Open', 'drive'], key: 'openDrive' },
+                    { labelLines: ['Close', 'drive'], key: 'closeDrive' },
+                    { labelLines: ['Requested', 'speed'], key: 'requestedSpeed' }
                 ];
-                const margin = { top: 24, right: 18, bottom: 18, left: 112 };
+                const margin = { top: 42, right: 18, bottom: 18, left: 156 };
                 const plotWidth = canvas.width - margin.left - margin.right;
                 const plotHeight = canvas.height - margin.top - margin.bottom;
                 const laneHeight = plotHeight / lanes.length;
@@ -3646,11 +3646,14 @@
                     ctx.lineTo(canvas.width - margin.right, y + laneHeight);
                     ctx.stroke();
 
-                    ctx.fillStyle = 'rgba(23, 34, 31, 0.86)';
-                    ctx.font = '700 12px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillStyle = 'rgba(23, 34, 31, 0.9)';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(lane.label, 14, y + (laneHeight / 2));
+                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillText(lane.labelLines[0], 14, y + (laneHeight / 2) - 11);
+                    ctx.font = '700 15px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillStyle = 'rgba(63, 82, 76, 0.88)';
+                    ctx.fillText(lane.labelLines[1], 14, y + (laneHeight / 2) + 13);
                 });
 
                 if (samples.length === 0) {
@@ -3713,13 +3716,13 @@
                     ctx.lineTo(x, canvas.height - margin.bottom);
                     ctx.stroke();
 
-                    ctx.fillStyle = 'rgba(255, 247, 237, 0.96)';
-                    ctx.fillRect(x - 18, margin.top - 16, 36, 12);
+                    ctx.fillStyle = 'rgba(255, 247, 237, 0.98)';
+                    ctx.fillRect(x - 28, margin.top - 28, 56, 18);
                     ctx.fillStyle = '#7c2d12';
-                    ctx.font = '700 9px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 12px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(shortLabel, x, margin.top - 10);
+                    ctx.fillText(shortLabel, x, margin.top - 19);
                 });
 
                 drawSeries(raw1, 0, 'rgba(37, 99, 235, 0.34)', 1.5);
