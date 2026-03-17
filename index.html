@@ -1627,13 +1627,14 @@
                 const frames = [];
                 const gap = fingerCount === 2 ? 108 : 116;
                 const startOffset = -((fingerCount - 1) * gap) / 2;
+                const fingerYOffset = fingerCount === 2 ? [-18, 14] : [-10, 0, 10];
 
                 for (let hold = 0; hold < this.demoLeadInFrames; hold++) {
                     const contacts = [];
                     for (let finger = 0; finger < fingerCount; finger++) {
                         contacts.push({
                             x: startX + startOffset + finger * gap,
-                            y: startY + Math.sin(finger) * 6,
+                            y: startY + (fingerYOffset[finger] || 0) + Math.sin(finger) * 6,
                             strength: this.demoStrength(12, finger * 2, hold)
                         });
                     }
@@ -1656,7 +1657,7 @@
                         const phase = (i * 0.35) + finger;
                         contacts.push({
                             x: baseX + startOffset + finger * gap,
-                            y: baseY + Math.sin(phase) * 6,
+                            y: baseY + (fingerYOffset[finger] || 0) + Math.sin(phase) * 6,
                             strength: this.demoStrength(12, finger * 2, i)
                         });
                     }
