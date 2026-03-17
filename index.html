@@ -4063,7 +4063,7 @@
                 drawSeries(openDrive, driveLaneIndex, '#3b82f6', 2.4);
                 drawSeries(closeDrive, driveLaneIndex, '#10b981', 2.4);
                 drawSeries(requestedSpeed, speedLaneIndex, '#d97706', 2.8, [12, 8]);
-                drawSeries(speedCaps, speedLaneIndex, 'rgba(31, 41, 55, 0.96)', 2.6, [10, 6]);
+                drawSeries(speedCaps, speedLaneIndex, 'rgba(17, 24, 39, 0.98)', 3.4, []);
 
                 const rawLegendItems = [
                     { label: 'EMG1', color: 'rgba(37, 99, 235, 0.9)', dash: [] },
@@ -4115,7 +4115,7 @@
 
                 const speedLegendItems = [
                     { label: 'SPEED', color: '#d97706', dash: [12, 8] },
-                    { label: 'CAP', color: 'rgba(31, 41, 55, 0.96)', dash: [10, 6] }
+                    { label: 'CAP', color: 'rgba(17, 24, 39, 0.98)', dash: [] }
                 ];
                 let speedLegendX = canvas.width - margin.right - 256;
                 const speedLegendY = margin.top + (laneHeight * speedLaneIndex) + 34;
