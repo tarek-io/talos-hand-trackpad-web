@@ -647,6 +647,74 @@
             color: var(--muted);
         }
 
+        .command-speed-scale {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 12px 12px 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.54);
+            border: 1px solid rgba(217, 119, 6, 0.12);
+        }
+
+        .command-speed-scale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .command-speed-scale-label,
+        .command-speed-cap-value {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .command-speed-cap-value {
+            text-align: right;
+        }
+
+        .command-speed-track {
+            position: relative;
+            height: 14px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: linear-gradient(90deg, rgba(217, 119, 6, 0.08), rgba(251, 191, 36, 0.1));
+            border: 1px solid rgba(26, 42, 37, 0.09);
+        }
+
+        .command-speed-cap-fill,
+        .command-speed-live-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px;
+        }
+
+        .command-speed-cap-fill {
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.32), rgba(249, 168, 37, 0.4));
+        }
+
+        .command-speed-live-fill {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.96));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+
+        .command-speed-axis {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
         .emg-sources {
             display: grid;
             gap: 12px;
@@ -1239,19 +1307,34 @@
                                 <h3 id="commandState" class="command-state">Neutral</h3>
                                 <div id="commandSpeed" class="command-speed">Speed 0%</div>
                             </div>
-                            <div class="command-track-wrap">
-                                <div class="command-track">
-                                    <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
-                                    <div class="command-center-line"></div>
-                                </div>
+                        <div class="command-track-wrap">
+                            <div class="command-track">
+                                <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
+                                <div class="command-center-line"></div>
+                            </div>
                                 <div class="command-axis-labels">
                                     <span>Open</span>
                                     <span>Neutral</span>
-                                    <span>Close</span>
-                                </div>
+                                <span>Close</span>
                             </div>
-                            <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
                         </div>
+                        <div class="command-speed-scale">
+                            <div class="command-speed-scale-header">
+                                <span class="command-speed-scale-label">Speed Scale</span>
+                                <span id="commandSpeedCapValue" class="command-speed-cap-value">Mode ceiling 44%</span>
+                            </div>
+                            <div class="command-speed-track">
+                                <div id="commandSpeedCapFill" class="command-speed-cap-fill" style="width: 44%;"></div>
+                                <div id="commandSpeedFill" class="command-speed-live-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="command-speed-axis">
+                                <span>Idle</span>
+                                <span id="commandSpeedAxisValue">0%</span>
+                                <span>Mode Max</span>
+                            </div>
+                        </div>
+                        <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
+                    </div>
 
                         <div class="emg-sources">
                             <div class="emg-source-row">
@@ -3404,14 +3487,27 @@
                 const speedEl = document.getElementById('commandSpeed');
                 const noteEl = document.getElementById('commandNote');
                 const fillEl = document.getElementById('commandFill');
+                const speedCapValueEl = document.getElementById('commandSpeedCapValue');
+                const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
+                const speedCapFillEl = document.getElementById('commandSpeedCapFill');
+                const speedFillEl = document.getElementById('commandSpeedFill');
                 const openValueEl = document.getElementById('openDriveValue');
                 const closeValueEl = document.getElementById('closeDriveValue');
                 const openFillEl = document.getElementById('openDriveFill');
                 const closeFillEl = document.getElementById('closeDriveFill');
 
+                if (!stateEl || !speedEl || !noteEl || !fillEl || !speedCapValueEl ||
+                    !speedAxisValueEl || !speedCapFillEl || !speedFillEl || !openValueEl ||
+                    !closeValueEl || !openFillEl || !closeFillEl) {
+                    return;
+                }
+
                 const displayState = this.controlCommand.available
                     ? (this.controlCommand.state || 'neutral').toLowerCase()
                     : (this.emgDrive.state || 'neutral').toLowerCase();
+                const speedModeKey = this.controlCommand.available
+                    ? (this.controlCommand.modeKey || 'open-hand')
+                    : (this.controllerState.modeKey === 'idle' ? 'open-hand' : this.controllerState.modeKey);
                 const stateMap = {
                     open: 'Open',
                     close: 'Close',
@@ -3420,6 +3516,7 @@
                 const openValue = Math.max(0, Math.min(100, this.emgDrive.open || 0));
                 const closeValue = Math.max(0, Math.min(100, this.emgDrive.close || 0));
                 const speed = this.getRequestedSpeed();
+                const modeCap = Math.max(0, Math.min(100, this.modeSpeedCaps[speedModeKey] ?? this.modeSpeedCaps['power-grasp']));
                 const command = displayState === 'open'
                     ? -openValue
                     : displayState === 'close'
@@ -3429,6 +3526,8 @@
 
                 stateEl.textContent = stateMap[displayState] || 'Neutral';
                 speedEl.textContent = `Speed ${speed}%`;
+                speedCapValueEl.textContent = `Mode ceiling ${modeCap}%`;
+                speedAxisValueEl.textContent = `${speed}% live`;
 
                 if (!this.emgDrive.available) {
                     noteEl.textContent = 'Awaiting emg drive data.';
@@ -3450,6 +3549,8 @@
                 closeValueEl.textContent = `${closeValue}%`;
                 openFillEl.style.width = `${openValue}%`;
                 closeFillEl.style.width = `${closeValue}%`;
+                speedCapFillEl.style.width = `${modeCap}%`;
+                speedFillEl.style.width = `${Math.min(speed, modeCap)}%`;
                 this.renderBehaviorMonitor();
             }
 
