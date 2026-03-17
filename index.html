@@ -641,12 +641,6 @@
             color: var(--muted);
         }
 
-        .command-note {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
         .command-speed-scale {
             display: grid;
             gap: 8px;
@@ -1321,7 +1315,6 @@
                                 <span>Mode Max</span>
                             </div>
                         </div>
-                        <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
                     </div>
 
                         <div class="emg-sources">
@@ -1371,7 +1364,7 @@
                             </div>
                         </div>
                         <div class="timeline-wrap">
-                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="980"></canvas>
+                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="900"></canvas>
                         </div>
                     </div>
                 </div>
@@ -3485,7 +3478,6 @@
             renderEmgDrive() {
                 const stateEl = document.getElementById('commandState');
                 const speedEl = document.getElementById('commandSpeed');
-                const noteEl = document.getElementById('commandNote');
                 const fillEl = document.getElementById('commandFill');
                 const speedCapValueEl = document.getElementById('commandSpeedCapValue');
                 const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
@@ -3496,7 +3488,7 @@
                 const openFillEl = document.getElementById('openDriveFill');
                 const closeFillEl = document.getElementById('closeDriveFill');
 
-                if (!stateEl || !speedEl || !noteEl || !fillEl || !speedCapValueEl ||
+                if (!stateEl || !speedEl || !fillEl || !speedCapValueEl ||
                     !speedAxisValueEl || !speedCapFillEl || !speedFillEl || !openValueEl ||
                     !closeValueEl || !openFillEl || !closeFillEl) {
                     return;
@@ -3528,14 +3520,6 @@
                 speedEl.textContent = `Speed ${speed}%`;
                 speedCapValueEl.textContent = `Mode ceiling ${modeCap}%`;
                 speedAxisValueEl.textContent = `${speed}% live`;
-
-                if (!this.emgDrive.available) {
-                    noteEl.textContent = 'Awaiting emg drive data.';
-                } else if (displayState === 'neutral' || magnitude === 0) {
-                    noteEl.textContent = 'No closure command is being driven right now.';
-                } else {
-                    noteEl.textContent = `${stateMap[displayState] || 'Neutral'} command is being driven from the two EMG sources below.`;
-                }
 
                 fillEl.style.width = `${magnitude}%`;
                 fillEl.style.left = command >= 0 ? '50%' : `calc(50% - ${magnitude}%)`;
