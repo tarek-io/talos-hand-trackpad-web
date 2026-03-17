@@ -3869,10 +3869,10 @@
                 const samples = this.timelineSamples;
                 const events = this.timelineEvents;
                 const lanes = [
-                    { labelLines: ['Raw', 'emg1 / emg2'], key: 'rawSignals' },
-                    { labelLines: ['Derived', 'drive / target / speed'], key: 'derivedControl' }
+                    { labelLines: ['RAW', 'EMG1 / EMG2'], key: 'rawSignals' },
+                    { labelLines: ['DERIVED', 'OPEN / CLOSE / SPEED'], key: 'derivedControl' }
                 ];
-                const margin = { top: 58, right: 24, bottom: 24, left: 182 };
+                const margin = { top: 64, right: 24, bottom: 24, left: 230 };
                 const plotWidth = canvas.width - margin.left - margin.right;
                 const plotHeight = canvas.height - margin.top - margin.bottom;
                 const laneHeight = plotHeight / lanes.length;
@@ -3880,6 +3880,7 @@
                 const derivedLaneIndex = 1;
                 const threshold = this.emgActivationThreshold;
                 const hysteresis = this.emgDominanceHysteresis;
+                const derivedDisplayMax = 80;
                 const modeSpeedCap = (modeKey) => this.modeSpeedCaps[modeKey] ?? this.modeSpeedCaps['power-grasp'];
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -3903,16 +3904,16 @@
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.9)';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    ctx.font = '700 25px Aptos, Segoe UI Variable, sans-serif';
-                    ctx.fillText(lane.labelLines[0], 16, y + (laneHeight / 2) - 15);
-                    ctx.font = '700 18px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 31px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillText(lane.labelLines[0], 18, y + (laneHeight / 2) - 18);
+                    ctx.font = '700 22px Aptos, Segoe UI Variable, sans-serif';
                     ctx.fillStyle = 'rgba(63, 82, 76, 0.88)';
-                    ctx.fillText(lane.labelLines[1], 16, y + (laneHeight / 2) + 17);
+                    ctx.fillText(lane.labelLines[1], 18, y + (laneHeight / 2) + 20);
                 });
 
                 if (samples.length === 0) {
                     ctx.fillStyle = 'rgba(63, 82, 76, 0.74)';
-                    ctx.font = '600 20px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '600 24px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('Waiting for layered control telemetry.', margin.left + (plotWidth / 2), margin.top + (plotHeight / 2));
@@ -3937,9 +3938,10 @@
                 const sampleCount = displaySamples.length;
                 const xForIndex = (index) => margin.left + ((sampleCount <= 1 ? 0 : index / (sampleCount - 1)) * plotWidth);
                 const yForPercent = (laneIndex, value) => {
-                    const clamped = Math.max(0, Math.min(100, value));
+                    const laneMax = laneIndex === derivedLaneIndex ? derivedDisplayMax : 100;
+                    const clamped = Math.max(0, Math.min(laneMax, value));
                     const laneTop = margin.top + (laneHeight * laneIndex);
-                    return laneTop + laneHeight - 12 - ((clamped / 100) * (laneHeight - 24));
+                    return laneTop + laneHeight - 12 - ((clamped / laneMax) * (laneHeight - 24));
                 };
 
                 const drawSeries = (values, laneIndex, color, lineWidth, dash = []) => {
@@ -3974,10 +3976,10 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = color;
-                    ctx.font = '700 16px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 18px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'right';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText(label, canvas.width - margin.right - 8, y - 6);
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(label, margin.left - 14, y);
                 };
 
                 const rawDisplayCenter = 2048;
@@ -4007,9 +4009,9 @@
                     Math.abs(sample.openDrive - sample.closeDrive) < hysteresis
                 );
 
-                drawHorizontalRule(rawLaneIndex, 50, 'rgba(63, 82, 76, 0.34)', 'bias', [4, 6]);
-                drawHorizontalRule(derivedLaneIndex, threshold, 'rgba(180, 83, 9, 0.72)', `on ${threshold}`);
-                drawHorizontalRule(derivedLaneIndex, this.emgReleaseThreshold, 'rgba(120, 53, 15, 0.44)', `off ${this.emgReleaseThreshold}`);
+                drawHorizontalRule(rawLaneIndex, 50, 'rgba(63, 82, 76, 0.34)', 'BIAS', [4, 6]);
+                drawHorizontalRule(derivedLaneIndex, threshold, 'rgba(180, 83, 9, 0.72)', `ON ${threshold}`);
+                drawHorizontalRule(derivedLaneIndex, this.emgReleaseThreshold, 'rgba(120, 53, 15, 0.44)', `OFF ${this.emgReleaseThreshold}`);
 
                 const derivedLaneTop = margin.top + (laneHeight * derivedLaneIndex);
                 if (sampleCount > 1) {
@@ -4035,11 +4037,11 @@
                 displayEvents.forEach((event) => {
                     const x = xForIndex(Math.max(0, Math.min(sampleCount - 1, event.sampleIndex)));
                     const shortLabel = {
-                        mode_switch: 'mode',
-                        drive_start: 'start',
-                        drive_stop: 'end',
-                        dual_activation: 'dual',
-                        link_fault: 'fault'
+                        mode_switch: 'MODE',
+                        drive_start: 'START',
+                        drive_stop: 'END',
+                        dual_activation: 'DUAL',
+                        link_fault: 'FAULT'
                     }[event.type] || event.type;
 
                     ctx.strokeStyle = 'rgba(180, 83, 9, 0.34)';
@@ -4050,12 +4052,12 @@
                     ctx.stroke();
 
                     ctx.fillStyle = 'rgba(255, 247, 237, 0.98)';
-                    ctx.fillRect(x - 38, margin.top - 36, 76, 26);
+                    ctx.fillRect(x - 44, margin.top - 40, 88, 30);
                     ctx.fillStyle = '#7c2d12';
-                    ctx.font = '700 16px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 18px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(shortLabel, x, margin.top - 23);
+                    ctx.fillText(shortLabel, x, margin.top - 25);
                 });
 
                 drawSeries(raw1, rawLaneIndex, 'rgba(37, 99, 235, 0.94)', 2.6);
@@ -4067,11 +4069,11 @@
                 drawSeries(speedCaps, derivedLaneIndex, 'rgba(63, 82, 76, 0.55)', 1.3, [3, 6]);
 
                 const rawLegendItems = [
-                    { label: 'emg1', color: 'rgba(37, 99, 235, 0.9)', dash: [] },
-                    { label: 'emg2', color: 'rgba(5, 150, 105, 0.9)', dash: [] }
+                    { label: 'EMG1', color: 'rgba(37, 99, 235, 0.9)', dash: [] },
+                    { label: 'EMG2', color: 'rgba(5, 150, 105, 0.9)', dash: [] }
                 ];
-                let rawLegendX = canvas.width - margin.right - 220;
-                const rawLegendY = margin.top + (laneHeight * rawLaneIndex) + 30;
+                let rawLegendX = canvas.width - margin.right - 270;
+                const rawLegendY = margin.top + (laneHeight * rawLaneIndex) + 34;
                 rawLegendItems.forEach((item) => {
                     ctx.beginPath();
                     ctx.setLineDash(item.dash);
@@ -4083,22 +4085,22 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
-                    ctx.font = '700 17px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(item.label, rawLegendX + 40, rawLegendY);
-                    rawLegendX += 106;
+                    rawLegendX += 124;
                 });
 
                 const legendItems = [
-                    { label: 'open', color: '#3b82f6', dash: [] },
-                    { label: 'close', color: '#10b981', dash: [] },
-                    { label: 'target', color: '#92400e', dash: [7, 5] },
-                    { label: 'speed', color: '#d97706', dash: [12, 8] },
-                    { label: 'cap', color: 'rgba(63, 82, 76, 0.7)', dash: [3, 6] }
+                    { label: 'OPEN', color: '#3b82f6', dash: [] },
+                    { label: 'CLOSE', color: '#10b981', dash: [] },
+                    { label: 'TARGET', color: '#92400e', dash: [7, 5] },
+                    { label: 'SPEED', color: '#d97706', dash: [12, 8] },
+                    { label: 'CAP', color: 'rgba(63, 82, 76, 0.7)', dash: [3, 6] }
                 ];
-                let legendX = canvas.width - margin.right - 520;
-                const legendY = derivedLaneTop + 30;
+                let legendX = canvas.width - margin.right - 640;
+                const legendY = derivedLaneTop + 34;
                 legendItems.forEach((item) => {
                     ctx.beginPath();
                     ctx.setLineDash(item.dash);
@@ -4110,11 +4112,11 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
-                    ctx.font = '700 17px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(item.label, legendX + 40, legendY);
-                    legendX += 104;
+                    legendX += 128;
                 });
             }
 
