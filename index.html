@@ -896,18 +896,20 @@
 
         .adaptive-finger-grid {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: 1fr;
             gap: 10px;
         }
 
         .adaptive-finger-card {
             display: grid;
-            gap: 8px;
-            padding: 10px;
+            grid-template-columns: 74px minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(26, 42, 37, 0.08);
-            min-height: 140px;
+            min-height: 0;
             transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
         }
 
@@ -917,25 +919,31 @@
             transform: translateY(-1px);
         }
 
-        .adaptive-finger-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
+        .adaptive-finger-identity {
+            display: grid;
+            gap: 6px;
+            justify-items: start;
+            align-content: center;
         }
 
         .adaptive-finger-short {
             color: var(--ink);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.12em;
             text-transform: uppercase;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: rgba(26, 42, 37, 0.06);
+            border: 1px solid rgba(26, 42, 37, 0.08);
         }
 
-        .adaptive-finger-percent {
+        .adaptive-finger-status {
             color: var(--muted);
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
         .adaptive-finger-pad {
@@ -974,6 +982,12 @@
         .adaptive-finger-metric {
             display: grid;
             gap: 4px;
+        }
+
+        .adaptive-finger-metrics {
+            display: grid;
+            gap: 10px;
+            min-width: 0;
         }
 
         .adaptive-finger-metric-head {
@@ -3624,30 +3638,32 @@
 
                 fingerGridEl.innerHTML = panelModel.fingerProfiles.map((finger) => `
                     <div class="adaptive-finger-card${finger.active ? ' is-active' : ''}">
-                        <div class="adaptive-finger-top">
+                        <div class="adaptive-finger-identity">
                             <span class="adaptive-finger-short">${finger.short}</span>
-                            <span class="adaptive-finger-percent">${finger.active ? 'Active' : 'Idle'}</span>
+                            <span class="adaptive-finger-status">${finger.active ? 'Active' : 'Idle'}</span>
+                            <div class="adaptive-finger-name">${finger.name}</div>
+                            <div class="adaptive-finger-pad"></div>
                         </div>
-                        <div class="adaptive-finger-pad"></div>
-                        <div class="adaptive-finger-metric">
-                            <div class="adaptive-finger-metric-head">
-                                <span class="adaptive-finger-metric-label">Touch</span>
-                                <span class="adaptive-finger-metric-value">${finger.pressure}%</span>
+                        <div class="adaptive-finger-metrics">
+                            <div class="adaptive-finger-metric">
+                                <div class="adaptive-finger-metric-head">
+                                    <span class="adaptive-finger-metric-label">Touch</span>
+                                    <span class="adaptive-finger-metric-value">${finger.pressure}%</span>
+                                </div>
+                                <div class="adaptive-finger-track">
+                                    <div class="adaptive-finger-fill" style="width: ${finger.pressure}%;"></div>
+                                </div>
                             </div>
-                            <div class="adaptive-finger-track">
-                                <div class="adaptive-finger-fill" style="width: ${finger.pressure}%;"></div>
+                            <div class="adaptive-finger-metric">
+                                <div class="adaptive-finger-metric-head">
+                                    <span class="adaptive-finger-metric-label">Support</span>
+                                    <span class="adaptive-finger-metric-value">${finger.support}%</span>
+                                </div>
+                                <div class="adaptive-finger-track response-track">
+                                    <div class="adaptive-finger-fill response-fill" style="width: ${finger.support}%;"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="adaptive-finger-metric">
-                            <div class="adaptive-finger-metric-head">
-                                <span class="adaptive-finger-metric-label">Support</span>
-                                <span class="adaptive-finger-metric-value">${finger.support}%</span>
-                            </div>
-                            <div class="adaptive-finger-track response-track">
-                                <div class="adaptive-finger-fill response-fill" style="width: ${finger.support}%;"></div>
-                            </div>
-                        </div>
-                        <div class="adaptive-finger-name">${finger.name}</div>
                     </div>
                 `).join('');
 
