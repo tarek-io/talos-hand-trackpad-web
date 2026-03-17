@@ -604,7 +604,7 @@
                 this.demoFrameIndex = 0;
                 this.demoTickMs = 40;
                 this.demoLeadInFrames = 4;
-                this.demoScenePauseFrames = 50;
+                this.demoScenePauseFrames = 38;
                 this.webSerialSupported = ('serial' in navigator);
                 this.showTrail = true;
                 this.touchHistory1 = [];
@@ -1476,9 +1476,17 @@
                 this.finalizeTwoFingerStroke();
                 this.finalizePrimaryStroke();
                 this.currentFingerCount = 0;
-                this.beginReleaseFade(this.touchHistory1);
-                this.beginReleaseFade(this.touchHistory2);
-                this.beginReleaseFade(this.touchHistory3);
+
+                if (this.isDemoMode) {
+                    this.touchHistory1 = [];
+                    this.touchHistory2 = [];
+                    this.touchHistory3 = [];
+                } else {
+                    this.beginReleaseFade(this.touchHistory1);
+                    this.beginReleaseFade(this.touchHistory2);
+                    this.beginReleaseFade(this.touchHistory3);
+                }
+
                 this.clearTouchInfo();
             }
 
