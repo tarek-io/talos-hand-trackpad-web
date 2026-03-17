@@ -984,12 +984,16 @@
                 const fingerGap = fingerCount === 2 ? 108 : 0;
                 const startOffset = -((fingerCount - 1) * fingerGap) / 2;
 
-                const buildContacts = (frameIndex) => {
+                const buildContacts = (frameIndex, tapIndex) => {
+                    const tapOffsetX = tapIndex === 1 ? 14 : 0;
+                    const tapOffsetY = tapIndex === 1 ? -8 : 0;
                     const contacts = [];
                     for (let finger = 0; finger < fingerCount; finger++) {
+                        const fingerOffsetX = tapIndex === 1 ? (finger * 2) - 1 : 0;
+                        const fingerOffsetY = tapIndex === 1 ? (finger === 0 ? -1 : 1) : 0;
                         contacts.push({
-                            x: centerX + startOffset + (finger * fingerGap),
-                            y: centerY + Math.sin(frameIndex + finger) * 4,
+                            x: centerX + tapOffsetX + fingerOffsetX + startOffset + (finger * fingerGap),
+                            y: centerY + tapOffsetY + fingerOffsetY + Math.sin(frameIndex + finger) * 4,
                             strength: this.demoStrength(12, finger * 2, frameIndex)
                         });
                     }
@@ -1002,7 +1006,7 @@
                             fingers: fingerCount,
                             area: fingerCount === 1 ? 6 : 8,
                             palm: 0,
-                            contacts: buildContacts(frame)
+                            contacts: buildContacts(frame, tapIndex)
                         }));
                     }
 
