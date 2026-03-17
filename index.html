@@ -2020,10 +2020,7 @@
                     ...this.withTelemetry(
                         this.createIdleScene(this.demoScenePauseFrames),
                         neutralTelemetry,
-                        inactiveTactile,
-                        [
-                            this.makeEventLine('mode_switch', 'open-hand')
-                        ]
+                        inactiveTactile
                     ),
                     ...this.withTelemetry(
                         this.createPinchScene(2, 260, 320, 600, 320, 38),
@@ -2082,10 +2079,7 @@
                     ...this.withTelemetry(
                         this.createIdleScene(this.demoScenePauseFrames),
                         neutralTelemetry,
-                        inactiveTactile,
-                        [
-                            this.makeEventLine('mode_switch', 'open-hand')
-                        ]
+                        inactiveTactile
                     ),
                     ...this.withTelemetry(
                         this.createPinchScene(3, 240, 420, 640, 420, 40),
@@ -2158,10 +2152,7 @@
                     ...this.withTelemetry(
                         this.createIdleScene(this.demoScenePauseFrames),
                         neutralTelemetry,
-                        inactiveTactile,
-                        [
-                            this.makeEventLine('mode_switch', 'open-hand')
-                        ]
+                        inactiveTactile
                     ),
                     ...this.withTelemetry(
                         this.createPalmScene(12),
@@ -4152,7 +4143,7 @@
                         : event.type === 'drive_stop'
                             ? `END${eventValueLabel ? ` ${eventValueLabel}` : ''}`
                             : ({
-                                mode_switch: 'MODE SWITCH',
+                                mode_switch: 'TRACKPAD MODE SWITCH',
                                 link_fault: 'FAULT'
                             }[event.type] || event.type.toUpperCase());
 
