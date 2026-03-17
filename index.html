@@ -59,7 +59,7 @@
             padding: 28px;
             box-shadow: var(--shadow);
             border: 1px solid rgba(255, 255, 255, 0.55);
-            max-width: 1720px;
+            max-width: 1920px;
             width: 100%;
         }
 
@@ -387,8 +387,8 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: minmax(0, 0.92fr) minmax(560px, 1.08fr);
-            gap: 18px;
+            grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+            gap: 20px;
             align-items: start;
         }
 
@@ -404,7 +404,15 @@
             align-content: start;
         }
 
-        .dashboard-side > .stack-panel {
+        .dashboard-side-top {
+            display: grid;
+            grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+            gap: 14px;
+            align-items: start;
+        }
+
+        .dashboard-side > .stack-panel,
+        .dashboard-side-top > .stack-panel {
             display: grid;
             gap: 10px;
         }
@@ -864,6 +872,7 @@
         .analysis-panel {
             display: grid;
             gap: 14px;
+            min-width: 0;
         }
 
         .serial-panel {
@@ -945,6 +954,10 @@
             }
 
             .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-side-top {
                 grid-template-columns: 1fr;
             }
 
@@ -1049,76 +1062,78 @@
                 </div>
 
                 <div class="dashboard-side">
-                    <div class="stack-panel timeline-panel analysis-panel">
-                        <h3 class="stack-title">Signal Analysis</h3>
-                        <div class="timeline-toolbar">
-                            <div class="timeline-actions">
-                                <button id="startRecordingBtn" class="timeline-btn record-btn">Start Recording</button>
-                                <button id="stopRecordingBtn" class="timeline-btn disconnect-btn" disabled>Stop Recording</button>
-                                <button id="replaySessionBtn" class="timeline-btn replay-btn" disabled>Replay Session</button>
-                                <button id="pauseReplayBtn" class="timeline-btn clear-btn" disabled>Pause Replay</button>
-                                <button id="exportSessionBtn" class="timeline-btn utility-btn" disabled>Export Session</button>
-                                <button id="importSessionBtn" class="timeline-btn utility-btn">Import Session</button>
-                                <input id="importSessionInput" type="file" accept="application/json,.json" hidden>
+                    <div class="dashboard-side-top">
+                        <div class="stack-panel">
+                            <h3 class="stack-title">EMG Drive</h3>
+
+                            <div class="command-card">
+                                <p class="command-eyebrow">Closure Command</p>
+                                <div class="command-state-row">
+                                    <h3 id="commandState" class="command-state">Neutral</h3>
+                                    <div id="commandSpeed" class="command-speed">Speed 0%</div>
+                                </div>
+                                <div class="command-track-wrap">
+                                    <div class="command-track">
+                                        <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
+                                        <div class="command-center-line"></div>
+                                    </div>
+                                    <div class="command-axis-labels">
+                                        <span>Open</span>
+                                        <span>Neutral</span>
+                                        <span>Close</span>
+                                    </div>
+                                </div>
+                                <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
                             </div>
-                            <p id="sessionStatus" class="timeline-status">No session recorded yet.</p>
-                            <div class="timeline-scrub">
-                                <input id="sessionScrubber" class="timeline-scrubber" type="range" min="0" max="1000" value="0" disabled>
-                                <div class="timeline-scrub-meta">
-                                    <span id="sessionPositionLabel">00:00.0</span>
-                                    <span id="sessionDurationLabel">00:00.0</span>
+
+                            <div class="emg-sources">
+                                <div class="emg-source-row">
+                                    <div class="emg-source-header">
+                                        <span>Open Drive</span>
+                                        <span id="openDriveValue">0%</span>
+                                    </div>
+                                    <div class="emg-source-track">
+                                        <div class="emg-threshold"></div>
+                                        <div id="openDriveFill" class="emg-source-fill open" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="emg-source-row">
+                                    <div class="emg-source-header">
+                                        <span>Close Drive</span>
+                                        <span id="closeDriveValue">0%</span>
+                                    </div>
+                                    <div class="emg-source-track">
+                                        <div class="emg-threshold"></div>
+                                        <div id="closeDriveFill" class="emg-source-fill close" style="width: 0%;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="timeline-wrap">
-                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1200" height="560"></canvas>
-                        </div>
-                    </div>
 
-                    <div class="stack-panel">
-                        <h3 class="stack-title">EMG Drive</h3>
-
-                        <div class="command-card">
-                            <p class="command-eyebrow">Closure Command</p>
-                            <div class="command-state-row">
-                                <h3 id="commandState" class="command-state">Neutral</h3>
-                                <div id="commandSpeed" class="command-speed">Speed 0%</div>
-                            </div>
-                            <div class="command-track-wrap">
-                                <div class="command-track">
-                                    <div id="commandFill" class="command-fill" style="left: 50%; width: 0%;"></div>
-                                    <div class="command-center-line"></div>
+                        <div class="stack-panel timeline-panel analysis-panel">
+                            <h3 class="stack-title">Signal Analysis</h3>
+                            <div class="timeline-toolbar">
+                                <div class="timeline-actions">
+                                    <button id="startRecordingBtn" class="timeline-btn record-btn">Start Recording</button>
+                                    <button id="stopRecordingBtn" class="timeline-btn disconnect-btn" disabled>Stop Recording</button>
+                                    <button id="replaySessionBtn" class="timeline-btn replay-btn" disabled>Replay Session</button>
+                                    <button id="pauseReplayBtn" class="timeline-btn clear-btn" disabled>Pause Replay</button>
+                                    <button id="exportSessionBtn" class="timeline-btn utility-btn" disabled>Export Session</button>
+                                    <button id="importSessionBtn" class="timeline-btn utility-btn">Import Session</button>
+                                    <input id="importSessionInput" type="file" accept="application/json,.json" hidden>
                                 </div>
-                                <div class="command-axis-labels">
-                                    <span>Open</span>
-                                    <span>Neutral</span>
-                                    <span>Close</span>
+                                <p id="sessionStatus" class="timeline-status">No session recorded yet.</p>
+                                <div class="timeline-scrub">
+                                    <input id="sessionScrubber" class="timeline-scrubber" type="range" min="0" max="1000" value="0" disabled>
+                                    <div class="timeline-scrub-meta">
+                                        <span id="sessionPositionLabel">00:00.0</span>
+                                        <span id="sessionDurationLabel">00:00.0</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="commandNote" class="command-note">Awaiting emg drive data.</div>
-                        </div>
-
-                        <div class="emg-sources">
-                            <div class="emg-source-row">
-                                <div class="emg-source-header">
-                                    <span>Open Drive</span>
-                                    <span id="openDriveValue">0%</span>
-                                </div>
-                                <div class="emg-source-track">
-                                    <div class="emg-threshold"></div>
-                                    <div id="openDriveFill" class="emg-source-fill open" style="width: 0%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="emg-source-row">
-                                <div class="emg-source-header">
-                                    <span>Close Drive</span>
-                                    <span id="closeDriveValue">0%</span>
-                                </div>
-                                <div class="emg-source-track">
-                                    <div class="emg-threshold"></div>
-                                    <div id="closeDriveFill" class="emg-source-fill close" style="width: 0%;"></div>
-                                </div>
+                            <div class="timeline-wrap">
+                                <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1320" height="620"></canvas>
                             </div>
                         </div>
                     </div>
