@@ -1305,6 +1305,9 @@
                 this.timelineMaxSamples = 420;
                 this.timelineDisplaySamples = 128;
                 this.timelineMaxEvents = 96;
+                this.timelineAnnotationLatch = {
+                    activeState: null
+                };
                 this.isRecording = false;
                 this.recordingStartedAtMs = 0;
                 this.recordedEntries = [];
@@ -2797,6 +2800,9 @@
             resetTimelineBuffers() {
                 this.timelineSamples = [];
                 this.timelineEvents = [];
+                this.timelineAnnotationLatch = {
+                    activeState: null
+                };
                 this.telemetryPending = {
                     raw: null,
                     filtered: null,
@@ -2910,6 +2916,19 @@
             recordTimelineEvent(type, value) {
                 if (!type || type === 'none') {
                     return;
+                }
+
+                const normalizedValue = (value || '').trim().toLowerCase();
+                if (type === 'drive_start') {
+                    if (this.timelineAnnotationLatch.activeState) {
+                        return;
+                    }
+                    this.timelineAnnotationLatch.activeState = normalizedValue || 'active';
+                } else if (type === 'drive_stop') {
+                    if (!this.timelineAnnotationLatch.activeState) {
+                        return;
+                    }
+                    this.timelineAnnotationLatch.activeState = null;
                 }
 
                 const sampleIndex = this.timelineSamples.length > 0
