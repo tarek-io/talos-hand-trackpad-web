@@ -3866,10 +3866,10 @@
                     inactive: available
                         ? ''
                         : '',
-                    contact: `Contact detected in ${mode.name}.`,
-                    holding: `${mode.name}: hold stabilized.`,
-                    slip: `${mode.name}: slip correction active.`,
-                    adjusting: `${mode.name}: load balancing active.`
+                    contact: '',
+                    holding: '',
+                    slip: '',
+                    adjusting: ''
                 };
                 return {
                     stateLabel: stateMap[tactileMode] || 'Inactive',
