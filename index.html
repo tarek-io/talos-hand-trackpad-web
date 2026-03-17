@@ -624,7 +624,7 @@
 
         .command-track-wrap {
             position: relative;
-            padding-top: 26px;
+            padding-top: 18px;
             margin-bottom: 10px;
         }
 
@@ -665,7 +665,7 @@
 
         .command-threshold-marker {
             position: absolute;
-            top: -20px;
+            top: -12px;
             transform: translateX(-50%);
             display: grid;
             gap: 2px;
@@ -675,40 +675,26 @@
 
         .command-threshold-line {
             width: 2px;
-            height: 20px;
+            height: 30px;
             border-radius: 999px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
         }
 
         .command-threshold-label {
-            padding: 2px 6px;
+            padding: 1px 5px;
             border-radius: 999px;
             background: rgba(255, 250, 240, 0.92);
             border: 1px solid rgba(180, 83, 9, 0.16);
             color: rgba(124, 45, 18, 0.88);
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 800;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             white-space: nowrap;
         }
 
-        .command-threshold-marker.off {
-            top: -2px;
-        }
-
         .command-threshold-marker.on .command-threshold-line {
             background: rgba(180, 83, 9, 0.72);
-        }
-
-        .command-threshold-marker.off .command-threshold-line {
-            background: rgba(120, 53, 15, 0.44);
-        }
-
-        .command-threshold-marker.off .command-threshold-label {
-            border-color: rgba(120, 53, 15, 0.14);
-            color: rgba(120, 53, 15, 0.78);
-            background: rgba(255, 249, 243, 0.9);
         }
 
         .command-axis-labels {
@@ -1326,19 +1312,11 @@
                             </div>
                         <div class="command-track-wrap">
                             <div id="commandThresholdOpenOn" class="command-threshold-marker on" style="left: 28%;">
-                                <span class="command-threshold-label">On 22</span>
-                                <span class="command-threshold-line"></span>
-                            </div>
-                            <div id="commandThresholdOpenOff" class="command-threshold-marker off" style="left: 32%;">
-                                <span class="command-threshold-label">Off 18</span>
-                                <span class="command-threshold-line"></span>
-                            </div>
-                            <div id="commandThresholdCloseOff" class="command-threshold-marker off" style="left: 68%;">
-                                <span class="command-threshold-label">Off 18</span>
+                                <span class="command-threshold-label">22</span>
                                 <span class="command-threshold-line"></span>
                             </div>
                             <div id="commandThresholdCloseOn" class="command-threshold-marker on" style="left: 72%;">
-                                <span class="command-threshold-label">On 22</span>
+                                <span class="command-threshold-label">22</span>
                                 <span class="command-threshold-line"></span>
                             </div>
                             <div class="command-track">
@@ -3557,8 +3535,6 @@
                 const openFillEl = document.getElementById('commandFillOpen');
                 const closeFillEl = document.getElementById('commandFillClose');
                 const thresholdOpenOnEl = document.getElementById('commandThresholdOpenOn');
-                const thresholdOpenOffEl = document.getElementById('commandThresholdOpenOff');
-                const thresholdCloseOffEl = document.getElementById('commandThresholdCloseOff');
                 const thresholdCloseOnEl = document.getElementById('commandThresholdCloseOn');
                 const speedCapValueEl = document.getElementById('commandSpeedCapValue');
                 const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
@@ -3566,7 +3542,7 @@
                 const speedFillEl = document.getElementById('commandSpeedFill');
 
                 if (!stateEl || !openFillEl || !closeFillEl || !thresholdOpenOnEl ||
-                    !thresholdOpenOffEl || !thresholdCloseOffEl || !thresholdCloseOnEl || !speedCapValueEl ||
+                    !thresholdCloseOnEl || !speedCapValueEl ||
                     !speedAxisValueEl || !speedCapFillEl || !speedFillEl) {
                     return;
                 }
@@ -3587,7 +3563,6 @@
                 const speed = this.getRequestedSpeed();
                 const modeCap = Math.max(0, Math.min(100, this.modeSpeedCaps[speedModeKey] ?? this.modeSpeedCaps['power-grasp']));
                 const activationThreshold = Math.max(0, Math.min(100, this.emgActivationThreshold || 0));
-                const releaseThreshold = Math.max(0, Math.min(100, this.emgReleaseThreshold || 0));
                 stateEl.textContent = stateMap[displayState] || 'Neutral';
                 speedCapValueEl.textContent = `Mode ceiling ${modeCap}%`;
                 speedAxisValueEl.textContent = `${speed}% live`;
@@ -3601,13 +3576,9 @@
                 closeFillEl.style.opacity = displayState === 'close' ? '1' : (displayState === 'neutral' ? '0.75' : '0.45');
 
                 thresholdOpenOnEl.style.left = `${50 - activationThreshold}%`;
-                thresholdOpenOffEl.style.left = `${50 - releaseThreshold}%`;
-                thresholdCloseOffEl.style.left = `${50 + releaseThreshold}%`;
                 thresholdCloseOnEl.style.left = `${50 + activationThreshold}%`;
-                thresholdOpenOnEl.querySelector('.command-threshold-label').textContent = `On ${activationThreshold}`;
-                thresholdOpenOffEl.querySelector('.command-threshold-label').textContent = `Off ${releaseThreshold}`;
-                thresholdCloseOffEl.querySelector('.command-threshold-label').textContent = `Off ${releaseThreshold}`;
-                thresholdCloseOnEl.querySelector('.command-threshold-label').textContent = `On ${activationThreshold}`;
+                thresholdOpenOnEl.querySelector('.command-threshold-label').textContent = `${activationThreshold}`;
+                thresholdCloseOnEl.querySelector('.command-threshold-label').textContent = `${activationThreshold}`;
 
                 speedCapFillEl.style.width = `${modeCap}%`;
                 speedFillEl.style.width = `${Math.min(speed, modeCap)}%`;
