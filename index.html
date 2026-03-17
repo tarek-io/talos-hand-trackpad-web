@@ -1629,21 +1629,21 @@
                 this.emgDominanceHysteresis = 8;
                 this.emgReleaseThreshold = Math.max(0, this.emgActivationThreshold - Math.trunc(this.emgDominanceHysteresis / 2));
                 this.emgNormalizationMax = 1600;
-                this.commandTargetRiseStep = 2;
-                this.commandTargetFallStep = 3;
-                this.commandTargetQuietZone = 6;
+                this.commandTargetRiseStep = 1;
+                this.commandTargetFallStep = 2;
+                this.commandTargetQuietZone = 8;
                 this.commandRiseStep = 2;
-                this.commandFallStep = 3;
-                this.cardDriveRiseStep = 2;
-                this.cardDriveFallStep = 3;
-                this.cardSpeedRiseStep = 2;
-                this.cardSpeedFallStep = 3;
-                this.plotDriveRiseStep = 2;
-                this.plotDriveFallStep = 3;
-                this.plotDriveQuietZone = 2;
-                this.plotSpeedRiseStep = 2;
-                this.plotSpeedFallStep = 3;
-                this.plotSpeedQuietZone = 2;
+                this.commandFallStep = 2;
+                this.cardDriveRiseStep = 1;
+                this.cardDriveFallStep = 2;
+                this.cardSpeedRiseStep = 1;
+                this.cardSpeedFallStep = 2;
+                this.plotDriveRiseStep = 1;
+                this.plotDriveFallStep = 2;
+                this.plotDriveQuietZone = 4;
+                this.plotSpeedRiseStep = 1;
+                this.plotSpeedFallStep = 2;
+                this.plotSpeedQuietZone = 4;
                 this.modeSpeedCaps = {
                     idle: 44,
                     'open-hand': 44,
