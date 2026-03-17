@@ -1303,6 +1303,7 @@
                 this.timelineSamples = [];
                 this.timelineEvents = [];
                 this.timelineMaxSamples = 420;
+                this.timelineDisplaySamples = 96;
                 this.timelineMaxEvents = 96;
                 this.isRecording = false;
                 this.recordingStartedAtMs = 0;
@@ -3800,27 +3801,9 @@
                     return;
                 }
 
-                const closeStartEvent = [...events].reverse().find((event) =>
-                    event.type === 'drive_start' && String(event.value || '').toLowerCase() === 'close'
-                );
-                const fallbackStartEvent = [...events].reverse().find((event) =>
-                    event.type === 'mode_switch' && String(event.value || '').toLowerCase() !== 'open-hand'
-                ) || [...events].reverse().find((event) => event.type === 'drive_start');
-                const cycleStartIndex = closeStartEvent
-                    ? closeStartEvent.sampleIndex
-                    : fallbackStartEvent
-                        ? fallbackStartEvent.sampleIndex
-                        : Math.max(0, samples.length - 120);
-                const openStopEvent = events.find((event) =>
-                    event.sampleIndex > cycleStartIndex &&
-                    event.type === 'drive_stop' &&
-                    String(event.value || '').toLowerCase() === 'open'
-                );
-                const cycleEndIndex = openStopEvent
-                    ? openStopEvent.sampleIndex
-                    : Math.max(cycleStartIndex + 1, samples.length - 1);
-                const displayStartIndex = Math.max(0, cycleStartIndex - 10);
-                const displayEndIndex = Math.min(samples.length, cycleEndIndex + 14);
+                const displaySampleCount = Math.max(24, this.timelineDisplaySamples || 96);
+                const displayEndIndex = Math.max(0, samples.length - 1);
+                const displayStartIndex = Math.max(0, displayEndIndex - displaySampleCount + 1);
                 const displaySamples = samples.slice(displayStartIndex, displayEndIndex + 1);
                 const displayEvents = events
                     .filter((event) => event.sampleIndex >= displayStartIndex && event.sampleIndex <= displayEndIndex)
