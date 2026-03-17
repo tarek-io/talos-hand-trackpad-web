@@ -593,13 +593,6 @@
             color: var(--ink);
         }
 
-        .command-speed {
-            font-size: 13px;
-            color: var(--muted);
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
         .command-track-wrap {
             margin-bottom: 10px;
         }
@@ -1230,7 +1223,6 @@
                             <p class="command-eyebrow">Closure Command</p>
                             <div class="command-state-row">
                                 <h3 id="commandState" class="command-state">Neutral</h3>
-                                <div id="commandSpeed" class="command-speed">Speed 0%</div>
                             </div>
                         <div class="command-track-wrap">
                             <div class="command-track">
@@ -3395,14 +3387,13 @@
 
             renderEmgDrive() {
                 const stateEl = document.getElementById('commandState');
-                const speedEl = document.getElementById('commandSpeed');
                 const fillEl = document.getElementById('commandFill');
                 const speedCapValueEl = document.getElementById('commandSpeedCapValue');
                 const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
                 const speedCapFillEl = document.getElementById('commandSpeedCapFill');
                 const speedFillEl = document.getElementById('commandSpeedFill');
 
-                if (!stateEl || !speedEl || !fillEl || !speedCapValueEl ||
+                if (!stateEl || !fillEl || !speedCapValueEl ||
                     !speedAxisValueEl || !speedCapFillEl || !speedFillEl) {
                     return;
                 }
@@ -3430,7 +3421,6 @@
                 const magnitude = Math.abs(command);
 
                 stateEl.textContent = stateMap[displayState] || 'Neutral';
-                speedEl.textContent = `Speed ${speed}%`;
                 speedCapValueEl.textContent = `Mode ceiling ${modeCap}%`;
                 speedAxisValueEl.textContent = `${speed}% live`;
 
