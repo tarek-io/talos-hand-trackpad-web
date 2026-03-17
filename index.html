@@ -210,7 +210,7 @@
             margin: 0;
             max-width: 280px;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 13px;
             line-height: 1.45;
             text-align: center;
         }
@@ -819,7 +819,7 @@
                         <h1>Control Console</h1>
                     </div>
                     <div class="page-header-actions">
-                        <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode with Simulated Data</button>
+                        <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode</button>
                         <p class="demo-help">Runs a realistic simulated input stream for previewing the interface without hardware.</p>
                     </div>
                 </div>
@@ -837,7 +837,7 @@
                 <button id="disconnectBtn" class="disconnect-btn" disabled>Disconnect</button>
             </div>
 
-            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode with Simulated Data" for preview input</div>
+            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for preview input</div>
 
             <div class="dashboard-grid">
                 <div class="dashboard-main">
@@ -1279,7 +1279,7 @@
                     disconnectBtn.disabled = false;
                 } else {
                     statusEl.className = 'status disconnected';
-                statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode with Simulated Data" for preview input';
+                statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for preview input';
                     connectBtn.disabled = !this.webSerialSupported;
                     demoBtn.disabled = false;
                     disconnectBtn.disabled = true;
