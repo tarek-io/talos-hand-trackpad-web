@@ -3615,6 +3615,7 @@
                 const stateEl = document.getElementById('commandState');
                 const openFillEl = document.getElementById('commandFillOpen');
                 const closeFillEl = document.getElementById('commandFillClose');
+                const trackEl = document.querySelector('.command-track');
                 const thresholdOpenOffEl = document.getElementById('commandThresholdOpenOff');
                 const thresholdOpenOnEl = document.getElementById('commandThresholdOpenOn');
                 const thresholdCloseOffEl = document.getElementById('commandThresholdCloseOff');
@@ -3629,7 +3630,7 @@
                 const speedFillEl = document.getElementById('commandSpeedFill');
 
                 if (!stateEl || !openFillEl || !closeFillEl || !thresholdOpenOffEl || !thresholdOpenOnEl ||
-                    !thresholdCloseOffEl || !thresholdCloseOnEl || !thresholdOpenOffLabelEl || !thresholdOpenLabelEl ||
+                    !trackEl || !thresholdCloseOffEl || !thresholdCloseOnEl || !thresholdOpenOffLabelEl || !thresholdOpenLabelEl ||
                     !thresholdCloseOffLabelEl || !thresholdCloseLabelEl || !speedCapValueEl || !speedAxisValueEl ||
                     !speedCapFillEl || !speedFillEl) {
                     return;
@@ -3685,10 +3686,16 @@
                 closeFillEl.style.left = '50%';
                 closeFillEl.style.opacity = displayState === 'close' ? '1' : (displayState === 'neutral' ? '0.75' : '0.45');
 
-                thresholdOpenOffEl.style.left = `calc(${50 - releaseThreshold}% - 1px)`;
-                thresholdOpenOnEl.style.left = `calc(${50 - activationThreshold}% - 1px)`;
-                thresholdCloseOffEl.style.left = `calc(${50 + releaseThreshold}% - 1px)`;
-                thresholdCloseOnEl.style.left = `calc(${50 + activationThreshold}% - 1px)`;
+                const trackWidth = trackEl.clientWidth || 0;
+                const placeGuideAtPercent = (el, percent) => {
+                    const guideLeft = Math.round((trackWidth * percent) / 100) - 1;
+                    el.style.left = `${guideLeft}px`;
+                };
+
+                placeGuideAtPercent(thresholdOpenOffEl, 50 - releaseThreshold);
+                placeGuideAtPercent(thresholdOpenOnEl, 50 - activationThreshold);
+                placeGuideAtPercent(thresholdCloseOffEl, 50 + releaseThreshold);
+                placeGuideAtPercent(thresholdCloseOnEl, 50 + activationThreshold);
                 thresholdOpenOffLabelEl.style.left = `${50 - releaseThreshold}%`;
                 thresholdOpenLabelEl.style.left = `${50 - activationThreshold}%`;
                 thresholdCloseOffLabelEl.style.left = `${50 + releaseThreshold}%`;
