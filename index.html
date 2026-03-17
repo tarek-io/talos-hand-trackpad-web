@@ -3800,16 +3800,30 @@
                     return;
                 }
 
-                const cycleAnchorEvent = [...events].reverse().find((event) =>
+                const closeStartEvent = [...events].reverse().find((event) =>
+                    event.type === 'drive_start' && String(event.value || '').toLowerCase() === 'close'
+                );
+                const fallbackStartEvent = [...events].reverse().find((event) =>
                     event.type === 'mode_switch' && String(event.value || '').toLowerCase() !== 'open-hand'
                 ) || [...events].reverse().find((event) => event.type === 'drive_start');
-                const defaultWindowStart = Math.max(0, samples.length - 160);
-                const displayStartIndex = cycleAnchorEvent
-                    ? Math.max(0, cycleAnchorEvent.sampleIndex - 8)
-                    : defaultWindowStart;
-                const displaySamples = samples.slice(displayStartIndex);
+                const cycleStartIndex = closeStartEvent
+                    ? closeStartEvent.sampleIndex
+                    : fallbackStartEvent
+                        ? fallbackStartEvent.sampleIndex
+                        : Math.max(0, samples.length - 120);
+                const openStopEvent = events.find((event) =>
+                    event.sampleIndex > cycleStartIndex &&
+                    event.type === 'drive_stop' &&
+                    String(event.value || '').toLowerCase() === 'open'
+                );
+                const cycleEndIndex = openStopEvent
+                    ? openStopEvent.sampleIndex
+                    : Math.max(cycleStartIndex + 1, samples.length - 1);
+                const displayStartIndex = Math.max(0, cycleStartIndex - 10);
+                const displayEndIndex = Math.min(samples.length, cycleEndIndex + 14);
+                const displaySamples = samples.slice(displayStartIndex, displayEndIndex + 1);
                 const displayEvents = events
-                    .filter((event) => event.sampleIndex >= displayStartIndex)
+                    .filter((event) => event.sampleIndex >= displayStartIndex && event.sampleIndex <= displayEndIndex)
                     .map((event) => ({
                         ...event,
                         sampleIndex: event.sampleIndex - displayStartIndex
