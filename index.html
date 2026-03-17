@@ -954,7 +954,7 @@
 
         .adaptive-response-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
 
@@ -963,6 +963,10 @@
             border-radius: 14px;
             background: rgba(255,255,255,0.9);
             border: 1px solid rgba(26, 42, 37, 0.08);
+        }
+
+        .adaptive-response-card.lead-card {
+            grid-column: 1 / -1;
         }
 
         .adaptive-response-label {
@@ -981,13 +985,6 @@
             font-size: 24px;
             line-height: 1;
             letter-spacing: -0.03em;
-        }
-
-        .adaptive-response-note {
-            margin: 0;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
         }
 
         .adaptive-metric-value {
@@ -1431,13 +1428,11 @@
                                         <p class="adaptive-response-label">Slip Guard</p>
                                         <p id="adaptiveSlipGuard" class="adaptive-response-value">Standby</p>
                                     </div>
-                                    <div class="adaptive-response-card">
+                                    <div class="adaptive-response-card lead-card">
                                         <p class="adaptive-response-label">Lead Fingers</p>
                                         <p id="adaptiveLeadFingers" class="adaptive-response-value">None</p>
                                     </div>
                                 </div>
-
-                                <p id="adaptiveResponseNote" class="adaptive-response-note">Awaiting fingertip contact before adaptive grasping adds hand-side support.</p>
                             </div>
                         </div>
                     </div>
@@ -3551,11 +3546,10 @@
                 const holdBiasEl = document.getElementById('adaptiveHoldBias');
                 const slipGuardEl = document.getElementById('adaptiveSlipGuard');
                 const leadFingersEl = document.getElementById('adaptiveLeadFingers');
-                const responseNoteEl = document.getElementById('adaptiveResponseNote');
 
                 if (!stateEl || !badgeEl || !assistEl || !contactsEl || !phaseEl || !summaryEl ||
                     !patternEl || !fingerGridEl || !responseModeEl || !holdBiasEl ||
-                    !slipGuardEl || !leadFingersEl || !responseNoteEl) {
+                    !slipGuardEl || !leadFingersEl) {
                     return;
                 }
 
@@ -3571,7 +3565,6 @@
                 holdBiasEl.textContent = `${panelModel.assistBias}%`;
                 slipGuardEl.textContent = panelModel.slipGuard;
                 leadFingersEl.textContent = panelModel.leadFingers;
-                responseNoteEl.textContent = panelModel.responseNote;
 
                 fingerGridEl.innerHTML = panelModel.fingerProfiles.map((finger) => `
                     <div class="adaptive-finger-card${finger.active ? ' is-active' : ''}">
@@ -3692,14 +3685,6 @@
                     slip: `${mode.name} slip correction active.`,
                     adjusting: `${mode.name} load balancing active.`
                 };
-                const responseNoteMap = {
-                    inactive: 'No tactile correction is being applied yet; the hand is simply watching for first contact.',
-                    contact: 'Initial contact is softening the hand-side response while the control system confirms a stable grasp.',
-                    holding: 'A steady hold bias is being layered on top of the selected mode to keep the object stable.',
-                    slip: 'Slip guard is reinforcing the loaded fingertips and asking for stronger retention until motion settles.',
-                    adjusting: 'Force is being rebalanced across the active fingertips to keep the grasp compliant and centered.'
-                };
-
                 return {
                     stateLabel: stateMap[tactileMode] || 'Inactive',
                     badgeLabel: available ? (tactileMode === 'inactive' ? 'Monitoring' : 'Live state') : 'Awaiting data',
@@ -3712,7 +3697,6 @@
                     assistBias: assistBiasMap[tactileMode] ?? 0,
                     slipGuard: slipGuardMap[tactileMode] || 'Standby',
                     leadFingers,
-                    responseNote: responseNoteMap[tactileMode] || responseNoteMap.inactive,
                     fingerProfiles
                 };
             }
