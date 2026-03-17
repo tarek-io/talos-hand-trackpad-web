@@ -339,8 +339,8 @@
             margin: 0;
             padding: 14px 14px 14px 34px;
             color: var(--muted);
-            height: 152px;
-            max-height: 152px;
+            height: 128px;
+            max-height: 128px;
             overflow-y: auto;
             border-radius: 14px;
             background: rgba(255,255,255,0.9);
@@ -521,8 +521,8 @@
             margin: 0;
             padding: 14px 14px 14px 34px;
             color: var(--muted);
-            height: 110px;
-            max-height: 110px;
+            height: 88px;
+            max-height: 88px;
             overflow-y: auto;
             border-radius: 14px;
             background: rgba(255,255,255,0.9);
@@ -709,66 +709,6 @@
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-        }
-
-        .emg-sources {
-            display: grid;
-            gap: 12px;
-        }
-
-        .emg-source-row {
-            display: grid;
-            gap: 7px;
-            padding: 12px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(26, 42, 37, 0.08);
-        }
-
-        .emg-source-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            font-size: 13px;
-            color: var(--ink);
-            font-weight: 700;
-        }
-
-        .emg-source-track {
-            position: relative;
-            height: 16px;
-            border-radius: 999px;
-            background: rgba(26, 42, 37, 0.08);
-            overflow: hidden;
-            border: 1px solid rgba(26, 42, 37, 0.1);
-        }
-
-        .emg-source-fill {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            border-radius: 999px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
-        }
-
-        .emg-source-fill.open {
-            background: linear-gradient(180deg, #60a5fa, #2563eb);
-        }
-
-        .emg-source-fill.close {
-            background: linear-gradient(180deg, #34d399, #0f766e);
-        }
-
-        .emg-threshold {
-            position: absolute;
-            top: 1px;
-            bottom: 1px;
-            width: 2px;
-            left: 70%;
-            background: rgba(26, 42, 37, 0.18);
-            border-radius: 999px;
         }
 
         .adaptive-status-card {
@@ -1320,29 +1260,6 @@
                         </div>
                     </div>
 
-                        <div class="emg-sources">
-                            <div class="emg-source-row">
-                                <div class="emg-source-header">
-                                    <span>Open Drive</span>
-                                    <span id="openDriveValue">0%</span>
-                                </div>
-                                <div class="emg-source-track">
-                                    <div class="emg-threshold"></div>
-                                    <div id="openDriveFill" class="emg-source-fill open" style="width: 0%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="emg-source-row">
-                                <div class="emg-source-header">
-                                    <span>Close Drive</span>
-                                    <span id="closeDriveValue">0%</span>
-                                </div>
-                                <div class="emg-source-track">
-                                    <div class="emg-threshold"></div>
-                                    <div id="closeDriveFill" class="emg-source-fill close" style="width: 0%;"></div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="stack-panel timeline-panel analysis-panel">
@@ -1367,7 +1284,7 @@
                             </div>
                         </div>
                         <div class="timeline-wrap">
-                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="900"></canvas>
+                            <canvas id="controlTimelineCanvas" class="timeline-canvas" width="1560" height="960"></canvas>
                         </div>
                     </div>
                 </div>
@@ -3484,14 +3401,9 @@
                 const speedAxisValueEl = document.getElementById('commandSpeedAxisValue');
                 const speedCapFillEl = document.getElementById('commandSpeedCapFill');
                 const speedFillEl = document.getElementById('commandSpeedFill');
-                const openValueEl = document.getElementById('openDriveValue');
-                const closeValueEl = document.getElementById('closeDriveValue');
-                const openFillEl = document.getElementById('openDriveFill');
-                const closeFillEl = document.getElementById('closeDriveFill');
 
                 if (!stateEl || !speedEl || !fillEl || !speedCapValueEl ||
-                    !speedAxisValueEl || !speedCapFillEl || !speedFillEl || !openValueEl ||
-                    !closeValueEl || !openFillEl || !closeFillEl) {
+                    !speedAxisValueEl || !speedCapFillEl || !speedFillEl) {
                     return;
                 }
 
@@ -3530,10 +3442,6 @@
                         ? 'linear-gradient(180deg, rgba(15, 118, 110, 0.95), rgba(11, 95, 89, 0.92))'
                         : 'linear-gradient(180deg, rgba(140, 152, 147, 0.6), rgba(109, 120, 116, 0.6))';
 
-                openValueEl.textContent = `${openValue}%`;
-                closeValueEl.textContent = `${closeValue}%`;
-                openFillEl.style.width = `${openValue}%`;
-                closeFillEl.style.width = `${closeValue}%`;
                 speedCapFillEl.style.width = `${modeCap}%`;
                 speedFillEl.style.width = `${Math.min(speed, modeCap)}%`;
                 this.renderBehaviorMonitor();
