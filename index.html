@@ -3869,9 +3869,9 @@
                 const samples = this.timelineSamples;
                 const events = this.timelineEvents;
                 const lanes = [
-                    { labelLines: ['RAW'], key: 'rawSignals' },
-                    { labelLines: ['DRIVE'], key: 'driveControl' },
-                    { labelLines: ['SPEED'], key: 'speedControl' }
+                    { labelLines: ['RAW'], key: 'rawSignals', accent: '#334155' },
+                    { labelLines: ['DRIVE'], key: 'driveControl', accent: '#0f766e' },
+                    { labelLines: ['SPEED'], key: 'speedControl', accent: '#d97706' }
                 ];
                 const margin = { top: 64, right: 24, bottom: 24, left: 230 };
                 const plotWidth = canvas.width - margin.left - margin.right;
@@ -3892,6 +3892,21 @@
                 ctx.fillStyle = 'rgba(15, 118, 110, 0.03)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                const drawRoundedRect = (x, y, width, height, radius) => {
+                    const r = Math.min(radius, width / 2, height / 2);
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + width - r, y);
+                    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+                    ctx.lineTo(x + width, y + height - r);
+                    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+                    ctx.lineTo(x + r, y + height);
+                    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+                    ctx.lineTo(x, y + r);
+                    ctx.quadraticCurveTo(x, y, x + r, y);
+                    ctx.closePath();
+                };
+
                 lanes.forEach((lane, index) => {
                     const y = margin.top + (laneHeight * index);
                     ctx.fillStyle = index % 2 === 0 ? 'rgba(15, 118, 110, 0.028)' : 'rgba(37, 99, 235, 0.036)';
@@ -3903,11 +3918,34 @@
                     ctx.lineTo(canvas.width - margin.right, y + laneHeight);
                     ctx.stroke();
 
-                    ctx.fillStyle = 'rgba(23, 34, 31, 0.9)';
-                    ctx.textAlign = 'left';
+                    const badgeWidth = 156;
+                    const badgeHeight = 56;
+                    const badgeX = 22;
+                    const badgeY = y + (laneHeight / 2) - (badgeHeight / 2);
+
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(20, 38, 31, 0.08)';
+                    ctx.shadowBlur = 16;
+                    ctx.shadowOffsetY = 4;
+                    drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 16);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+                    ctx.fill();
+                    ctx.restore();
+
+                    drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 16);
+                    ctx.strokeStyle = 'rgba(23, 34, 31, 0.12)';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+
+                    drawRoundedRect(badgeX + 10, badgeY + 10, 8, badgeHeight - 20, 4);
+                    ctx.fillStyle = lane.accent;
+                    ctx.fill();
+
+                    ctx.fillStyle = 'rgba(23, 34, 31, 0.92)';
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.font = '700 31px Aptos, Segoe UI Variable, sans-serif';
-                    ctx.fillText(lane.labelLines[0], 18, y + (laneHeight / 2));
+                    ctx.font = '700 28px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillText(lane.labelLines[0], badgeX + (badgeWidth / 2) + 6, badgeY + (badgeHeight / 2) + 1);
                 });
 
                 if (samples.length === 0) {
