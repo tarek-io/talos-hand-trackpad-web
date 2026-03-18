@@ -143,6 +143,7 @@
         .controls {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             gap: 12px;
             margin-bottom: 16px;
         }
@@ -241,20 +242,8 @@
             background: linear-gradient(180deg, #ff5c4b, var(--accent-strong));
         }
 
-        .demo-btn.header-demo-btn {
-            padding: 16px 28px;
-            font-size: 16px;
-            letter-spacing: 0.02em;
-            box-shadow: 0 14px 28px rgba(242, 72, 54, 0.22);
-        }
-
-        .demo-help {
-            margin: 0;
-            max-width: 280px;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.45;
-            text-align: center;
+        .controls-demo-btn {
+            margin-left: auto;
         }
 
         .demo-btn:disabled {
@@ -1228,8 +1217,8 @@
                 max-height: 68px;
             }
 
-            .demo-help {
-                text-align: left;
+            .controls-demo-btn {
+                margin-left: 0;
             }
 
             .info-panel {
@@ -1267,8 +1256,6 @@
                     </div>
                     <div class="page-header-actions">
                         <img class="brand-logo" src="assets/sarcomere-logo-text.png" alt="Sarcomere Dynamics logo">
-                        <button id="demoBtn" class="demo-btn header-demo-btn">Launch Demo Mode</button>
-                        <p class="demo-help">Runs a realistic simulated input stream for previewing the interface without hardware.</p>
                     </div>
                 </div>
             </div>
@@ -1284,9 +1271,10 @@
                 <button id="connectBtn" class="connect-btn">Connect to Serial</button>
                 <button id="pauseBtn" class="pause-btn" disabled>Pause</button>
                 <button id="disconnectBtn" class="disconnect-btn" disabled>Disconnect</button>
+                <button id="demoBtn" class="demo-btn controls-demo-btn">Demo Mode</button>
             </div>
 
-            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for preview input</div>
+            <div id="status" class="status disconnected">Disconnected - Use "Connect to Serial" for hardware or "Demo Mode" for preview input</div>
 
             <div class="dashboard-grid">
                 <div class="dashboard-main">
@@ -1916,7 +1904,7 @@
                     disconnectBtn.disabled = false;
                 } else {
                     statusEl.className = 'status disconnected';
-                    statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Launch Demo Mode" for preview input';
+                    statusEl.textContent = message || 'Disconnected - Use "Connect to Serial" for hardware or "Demo Mode" for preview input';
                     connectBtn.disabled = !this.webSerialSupported;
                     demoBtn.disabled = false;
                     if (pauseBtn) {
