@@ -651,7 +651,7 @@
             height: 20px;
             border-radius: 999px;
             overflow: hidden;
-            background: linear-gradient(90deg, rgba(74, 85, 104, 0.18), rgba(255, 255, 255, 0.11) 50%, rgba(242, 72, 54, 0.22));
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.14), rgba(15, 118, 110, 0.06) 50%, rgba(185, 56, 47, 0.14));
             border: 1px solid rgba(31, 36, 43, 0.12);
         }
 
@@ -685,11 +685,11 @@
         }
 
         .command-fill-open {
-            background: linear-gradient(180deg, rgba(95, 109, 129, 0.96), rgba(60, 70, 85, 0.92));
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.94), rgba(37, 99, 235, 0.9));
         }
 
         .command-fill-close {
-            background: linear-gradient(180deg, rgba(255, 106, 90, 0.96), rgba(242, 72, 54, 0.92));
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.94), rgba(15, 118, 110, 0.9));
         }
 
         .command-threshold-guide.is-off {
@@ -4562,7 +4562,7 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = 'rgba(71, 85, 105, 0.03)';
+                ctx.fillStyle = 'rgba(15, 118, 110, 0.03)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const drawRoundedRect = (x, y, width, height, radius) => {
@@ -4582,7 +4582,7 @@
 
                 lanes.forEach((lane, index) => {
                     const y = margin.top + (laneHeight * index);
-                    ctx.fillStyle = index % 2 === 0 ? 'rgba(71, 85, 105, 0.035)' : 'rgba(242, 72, 54, 0.03)';
+                    ctx.fillStyle = index % 2 === 0 ? 'rgba(15, 118, 110, 0.028)' : 'rgba(37, 99, 235, 0.036)';
                     ctx.fillRect(margin.left, y, plotWidth, laneHeight);
 
                     ctx.strokeStyle = 'rgba(31, 41, 55, 0.14)';
@@ -4736,7 +4736,7 @@
                     Math.abs(sample.openDrive - sample.closeDrive) < hysteresis
                 );
 
-                drawHorizontalRule(rawLaneIndex, 50, 'rgba(71, 85, 105, 0.44)', 'BIAS', [4, 6]);
+                drawHorizontalRule(rawLaneIndex, 50, 'rgba(63, 82, 76, 0.34)', 'BIAS', [4, 6]);
                 drawHorizontalRule(driveLaneIndex, threshold, 'rgba(242, 72, 54, 0.7)', `ON ${threshold}`);
                 drawHorizontalRule(driveLaneIndex, this.emgReleaseThreshold, 'rgba(174, 68, 56, 0.5)', `OFF ${this.emgReleaseThreshold}`);
 
@@ -4749,9 +4749,9 @@
                         if (dualActivationStates[i]) {
                             fill = 'rgba(217, 119, 6, 0.09)';
                         } else if (displaySamples[i].state === 'open') {
-                            fill = 'rgba(71, 85, 105, 0.08)';
+                            fill = 'rgba(59, 130, 246, 0.07)';
                         } else if (displaySamples[i].state === 'close') {
-                            fill = 'rgba(242, 72, 54, 0.08)';
+                            fill = 'rgba(16, 185, 129, 0.07)';
                         }
 
                         if (fill) {
@@ -4801,16 +4801,16 @@
                     ctx.fillText(shortLabel, x, margin.top - 25);
                 });
 
-                drawSeries(raw1, rawLaneIndex, 'rgba(71, 85, 105, 0.96)', 2.6);
-                drawSeries(raw2, rawLaneIndex, 'rgba(242, 72, 54, 0.9)', 2.6);
-                drawSeries(openDrive, driveLaneIndex, '#475569', 2.4);
-                drawSeries(closeDrive, driveLaneIndex, '#f24836', 2.4);
+                drawSeries(raw1, rawLaneIndex, 'rgba(37, 99, 235, 0.94)', 2.6);
+                drawSeries(raw2, rawLaneIndex, 'rgba(5, 150, 105, 0.94)', 2.6);
+                drawSeries(openDrive, driveLaneIndex, '#3b82f6', 2.4);
+                drawSeries(closeDrive, driveLaneIndex, '#10b981', 2.4);
                 drawSeries(requestedSpeed, speedLaneIndex, '#d97706', 2.8, []);
                 drawSeries(speedCaps, speedLaneIndex, 'rgba(17, 24, 39, 0.98)', 3.4, [12, 8]);
 
                 const rawLegendItems = [
-                    { label: 'EMG1', color: 'rgba(71, 85, 105, 0.9)', dash: [] },
-                    { label: 'EMG2', color: 'rgba(242, 72, 54, 0.9)', dash: [] }
+                    { label: 'EMG1', color: 'rgba(37, 99, 235, 0.9)', dash: [] },
+                    { label: 'EMG2', color: 'rgba(5, 150, 105, 0.9)', dash: [] }
                 ];
                 let rawLegendX = canvas.width - margin.right - 270;
                 const rawLegendY = margin.top + (laneHeight * rawLaneIndex) + 34;
@@ -4833,8 +4833,8 @@
                 });
 
                 const driveLegendItems = [
-                    { label: 'OPEN', color: '#475569', dash: [] },
-                    { label: 'CLOSE', color: '#f24836', dash: [] }
+                    { label: 'OPEN', color: '#3b82f6', dash: [] },
+                    { label: 'CLOSE', color: '#10b981', dash: [] }
                 ];
                 let driveLegendX = canvas.width - margin.right - 256;
                 const driveLegendY = margin.top + (laneHeight * driveLaneIndex) + 34;
