@@ -5,31 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Talos Hand Control Center</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap');
+
         :root {
-            --bg-cream: #e9edf2;
-            --bg-mint: #dce2e9;
-            --bg-wash: #f4f6f9;
-            --panel: rgba(255, 255, 255, 0.9);
-            --border: rgba(31, 36, 43, 0.12);
-            --border-strong: rgba(31, 36, 43, 0.22);
-            --ink: #161a20;
-            --muted: #545d69;
+            --bg-cream: #e2e7ee;
+            --bg-mint: #d7dde7;
+            --bg-wash: #f1f4f9;
+            --panel: rgba(255, 255, 255, 0.94);
+            --border: rgba(39, 45, 58, 0.14);
+            --border-strong: rgba(39, 45, 58, 0.24);
+            --ink: #171c24;
+            --muted: #4e5868;
             --accent: #f24836;
-            --accent-strong: #cf3a2b;
+            --accent-strong: #d43d2f;
             --danger: #f24836;
             --danger-strong: #c83629;
-            --sky: #3c4655;
-            --sky-strong: #2a313c;
+            --sky: #4a5568;
+            --sky-strong: #384252;
             --canvas-surface: #13171d;
-            --serial-bg: #101318;
-            --serial-border: #2a313b;
-            --serial-ink: #d6dde6;
-            --shadow: 0 30px 88px rgba(17, 22, 29, 0.2);
+            --serial-bg: #10141b;
+            --serial-border: #2d3644;
+            --serial-ink: #d7deea;
+            --shadow: 0 32px 92px rgba(17, 22, 29, 0.2);
             --radius-xl: 28px;
             --radius-lg: 20px;
             --radius-md: 14px;
-            --font-ui: "Aptos", "Segoe UI Variable", "Trebuchet MS", sans-serif;
-            --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+            --font-ui: "IBM Plex Sans Condensed", "Aptos", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+            --font-display: "IBM Plex Serif", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
         }
 
         * {
@@ -42,8 +44,8 @@
             padding: 32px 20px 48px;
             min-height: 100vh;
             background:
-                radial-gradient(circle at top left, rgba(242, 72, 54, 0.2), transparent 34%),
-                radial-gradient(circle at top right, rgba(34, 40, 49, 0.16), transparent 30%),
+                radial-gradient(circle at 10% -10%, rgba(242, 72, 54, 0.24), transparent 38%),
+                radial-gradient(circle at 88% -12%, rgba(55, 65, 81, 0.2), transparent 40%),
                 linear-gradient(145deg, var(--bg-cream), var(--bg-mint) 56%, var(--bg-wash));
             display: flex;
             flex-direction: column;
@@ -54,11 +56,11 @@
         .container {
             position: relative;
             overflow: hidden;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 243, 248, 0.92));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 251, 0.96));
             border-radius: var(--radius-xl);
             padding: 28px;
             box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.82);
             max-width: 2160px;
             width: 100%;
         }
@@ -71,7 +73,7 @@
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
                 linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
             background-size: 36px 36px;
-            opacity: 0.28;
+            opacity: 0.18;
             pointer-events: none;
         }
 
@@ -124,7 +126,7 @@
 
         .eyebrow {
             margin: 0 0 8px 0;
-            color: var(--accent);
+            color: #cc3a2d;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.22em;
@@ -137,7 +139,7 @@
             font-family: var(--font-display);
             font-size: clamp(32px, 5vw, 48px);
             line-height: 1;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
         }
 
         .controls {
@@ -156,7 +158,7 @@
             border-radius: 999px;
             cursor: pointer;
             transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
-            box-shadow: 0 10px 22px rgba(24, 33, 31, 0.08);
+            box-shadow: 0 10px 20px rgba(28, 34, 44, 0.12);
         }
 
         button:hover {
@@ -173,9 +175,9 @@
         }
 
         .connect-btn:disabled {
-            background: #b8c8c4;
-            color: #7b8884;
-            border-color: rgba(123, 136, 132, 0.24);
+            background: #c9cfda;
+            color: #787f8d;
+            border-color: rgba(120, 128, 141, 0.3);
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
@@ -191,9 +193,9 @@
         }
 
         .disconnect-btn:disabled {
-            background: #d4d8d6;
-            color: #7b8884;
-            border-color: rgba(123, 136, 132, 0.24);
+            background: #d7dbe3;
+            color: #787f8d;
+            border-color: rgba(120, 128, 141, 0.3);
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
@@ -215,9 +217,9 @@
         }
 
         .pause-btn:disabled {
-            background: #d4d8d6;
-            color: #7b8884;
-            border-color: rgba(123, 136, 132, 0.24);
+            background: #d7dbe3;
+            color: #787f8d;
+            border-color: rgba(120, 128, 141, 0.3);
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
@@ -289,9 +291,9 @@
             background:
                 radial-gradient(circle at top right, rgba(255,255,255,0.55), transparent 28%),
                 linear-gradient(145deg, rgba(248, 250, 253, 0.98), rgba(232, 237, 244, 0.94));
-            border: 1px solid rgba(242, 72, 54, 0.18);
+            border: 1px solid rgba(242, 72, 54, 0.22);
             box-shadow:
-                0 18px 42px rgba(20, 28, 38, 0.11),
+                0 16px 34px rgba(20, 28, 38, 0.11),
                 inset 0 1px 0 rgba(255,255,255,0.55);
             overflow: hidden;
             --mode-accent: var(--accent);
@@ -382,8 +384,8 @@
             max-height: 128px;
             overflow-y: auto;
             border-radius: 14px;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(248, 250, 253, 0.96);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .behavior-log:empty::before,
@@ -413,7 +415,7 @@
             margin: 0 auto;
             max-width: 100%;
             position: relative;
-            background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(240, 246, 242, 0.72));
+            background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(239, 243, 249, 0.76));
             padding: 12px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
         }
@@ -469,10 +471,10 @@
         }
 
         .info-box {
-            background: rgba(255,255,255,0.9);
+            background: rgba(248, 250, 253, 0.96);
             padding: 16px;
             border-radius: 14px;
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .info-box h3 {
@@ -568,8 +570,8 @@
             max-height: 88px;
             overflow-y: auto;
             border-radius: 14px;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(248, 250, 253, 0.96);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .gesture-log li {
@@ -582,7 +584,9 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 16px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.72),
+                0 12px 24px rgba(20, 26, 36, 0.06);
         }
 
         .stack-title {
@@ -647,7 +651,7 @@
             height: 20px;
             border-radius: 999px;
             overflow: hidden;
-            background: linear-gradient(90deg, rgba(60, 70, 85, 0.16), rgba(255, 255, 255, 0.1) 50%, rgba(242, 72, 54, 0.18));
+            background: linear-gradient(90deg, rgba(74, 85, 104, 0.18), rgba(255, 255, 255, 0.11) 50%, rgba(242, 72, 54, 0.22));
             border: 1px solid rgba(31, 36, 43, 0.12);
         }
 
@@ -664,7 +668,7 @@
 
         .command-center-line {
             left: 0;
-            background: rgba(26, 42, 37, 0.18);
+            background: rgba(31, 36, 43, 0.22);
         }
 
         .command-threshold-guide {
@@ -734,7 +738,7 @@
             padding: 12px 12px 10px;
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.54);
-            border: 1px solid rgba(217, 119, 6, 0.12);
+            border: 1px solid rgba(39, 45, 58, 0.12);
         }
 
         .command-speed-scale-header {
@@ -762,7 +766,7 @@
             height: 14px;
             border-radius: 999px;
             overflow: hidden;
-            background: linear-gradient(90deg, rgba(217, 119, 6, 0.08), rgba(251, 191, 36, 0.1));
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.12));
             border: 1px solid rgba(26, 42, 37, 0.09);
         }
 
@@ -860,8 +864,8 @@
         .adaptive-metric {
             padding: 12px;
             border-radius: 14px;
-            background: rgba(255,255,255,0.46);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(248, 250, 253, 0.92);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .adaptive-metric-label {
@@ -883,8 +887,8 @@
             gap: 12px;
             padding: 14px;
             border-radius: 16px;
-            background: rgba(255, 255, 255, 0.56);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(248, 250, 253, 0.94);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .adaptive-section-header {
@@ -921,8 +925,8 @@
             gap: 8px;
             padding: 10px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(39, 45, 58, 0.1);
             min-height: 102px;
             transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
         }
@@ -958,14 +962,14 @@
             width: 16px;
             height: 16px;
             border-radius: 999px;
-            border: 1px solid rgba(26, 42, 37, 0.12);
-            background: rgba(148, 163, 184, 0.24);
+            border: 1px solid rgba(39, 45, 58, 0.18);
+            background: rgba(148, 163, 184, 0.28);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
         }
 
         .adaptive-finger-card.is-active .adaptive-finger-pad {
-            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.62), rgba(16, 185, 129, 0.86));
-            border-color: rgba(15, 118, 110, 0.28);
+            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7), rgba(242, 72, 54, 0.88));
+            border-color: rgba(242, 72, 54, 0.36);
         }
 
         .adaptive-finger-track {
@@ -973,8 +977,8 @@
             height: 9px;
             border-radius: 999px;
             overflow: hidden;
-            background: rgba(26, 42, 37, 0.08);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(39, 45, 58, 0.08);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .adaptive-finger-fill {
@@ -983,7 +987,7 @@
             top: 0;
             bottom: 0;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(37, 99, 235, 0.9), rgba(16, 185, 129, 0.92));
+            background: linear-gradient(90deg, rgba(74, 85, 104, 0.94), rgba(242, 72, 54, 0.94));
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
         }
 
@@ -1002,8 +1006,8 @@
         .adaptive-response-card {
             padding: 12px;
             border-radius: 14px;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(26, 42, 37, 0.08);
+            background: rgba(255,255,255,0.98);
+            border: 1px solid rgba(39, 45, 58, 0.1);
         }
 
         .adaptive-response-card.lead-card {
@@ -1066,21 +1070,21 @@
         }
 
         .replay-btn {
-            background: linear-gradient(180deg, #377cf0, var(--sky));
+            background: linear-gradient(180deg, #5b6778, var(--sky));
             color: white;
         }
 
         .replay-btn:hover {
-            background: linear-gradient(180deg, #2d70de, var(--sky-strong));
+            background: linear-gradient(180deg, #495566, var(--sky-strong));
         }
 
         .utility-btn {
-            background: linear-gradient(180deg, #14857d, var(--accent));
+            background: linear-gradient(180deg, #5b6778, var(--sky));
             color: white;
         }
 
         .utility-btn:hover {
-            background: linear-gradient(180deg, #169088, var(--accent-strong));
+            background: linear-gradient(180deg, #495566, var(--sky-strong));
         }
 
         .timeline-btn:disabled {
@@ -1123,7 +1127,7 @@
             border: 1px solid var(--border-strong);
             border-radius: var(--radius-lg);
             overflow: hidden;
-            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248, 250, 249, 0.96));
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245, 248, 252, 0.97));
             padding: 14px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
         }
@@ -1133,7 +1137,7 @@
             width: 100%;
             height: auto;
             border-radius: 14px;
-            background: linear-gradient(180deg, #ffffff, #f7faf8);
+            background: linear-gradient(180deg, #ffffff, #f5f7fb);
         }
 
         .analysis-panel {
@@ -1144,8 +1148,8 @@
 
         .serial-panel {
             margin-top: 20px;
-            background: linear-gradient(180deg, rgba(19, 27, 25, 0.95), rgba(13, 18, 17, 0.96));
-            border: 1px solid rgba(66, 88, 80, 0.46);
+            background: linear-gradient(180deg, rgba(20, 24, 31, 0.96), rgba(14, 17, 23, 0.97));
+            border: 1px solid rgba(69, 78, 96, 0.46);
             border-radius: var(--radius-lg);
             padding: 16px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1161,7 +1165,7 @@
 
         .serial-stats {
             font-size: 12px;
-            color: #9bb3aa;
+            color: #9aa4b5;
         }
 
         .serial-output {
@@ -1675,27 +1679,27 @@
                 this.modeCatalog = {
                     idle: {
                         name: 'Open Hand',
-                        accent: '#0f766e',
+                        accent: '#4b5563',
                         summary: 'Default relaxed posture.'
                     },
                     'key-grasp': {
                         name: 'Key Grasp',
-                        accent: '#16a34a',
+                        accent: '#b45309',
                         summary: 'Lateral grip for thin objects.'
                     },
                     'tripod-grasp': {
                         name: 'Tripod Grasp',
-                        accent: '#d97706',
+                        accent: '#f24836',
                         summary: 'Three-point precision grasp.'
                     },
                     point: {
                         name: 'Point',
-                        accent: '#7c3aed',
+                        accent: '#334155',
                         summary: 'Index-led pointing posture.'
                     },
                     'thumbs-up': {
                         name: 'Thumbs Up',
-                        accent: '#f24836',
+                        accent: '#f87171',
                         summary: 'Thumb-led approval posture.'
                     }
                 };
@@ -4558,7 +4562,7 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = 'rgba(15, 118, 110, 0.03)';
+                ctx.fillStyle = 'rgba(71, 85, 105, 0.03)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const drawRoundedRect = (x, y, width, height, radius) => {
@@ -4578,10 +4582,10 @@
 
                 lanes.forEach((lane, index) => {
                     const y = margin.top + (laneHeight * index);
-                    ctx.fillStyle = index % 2 === 0 ? 'rgba(15, 118, 110, 0.028)' : 'rgba(37, 99, 235, 0.036)';
+                    ctx.fillStyle = index % 2 === 0 ? 'rgba(71, 85, 105, 0.035)' : 'rgba(242, 72, 54, 0.03)';
                     ctx.fillRect(margin.left, y, plotWidth, laneHeight);
 
-                    ctx.strokeStyle = 'rgba(23, 34, 31, 0.12)';
+                    ctx.strokeStyle = 'rgba(31, 41, 55, 0.14)';
                     ctx.beginPath();
                     ctx.moveTo(margin.left, y + laneHeight);
                     ctx.lineTo(canvas.width - margin.right, y + laneHeight);
@@ -4593,7 +4597,7 @@
                     const badgeY = y + (laneHeight / 2) - (badgeHeight / 2);
 
                     ctx.save();
-                    ctx.shadowColor = 'rgba(20, 38, 31, 0.08)';
+                    ctx.shadowColor = 'rgba(20, 26, 36, 0.1)';
                     ctx.shadowBlur = 16;
                     ctx.shadowOffsetY = 4;
                     drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 16);
@@ -4602,20 +4606,20 @@
                     ctx.restore();
 
                     drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 16);
-                    ctx.strokeStyle = 'rgba(23, 34, 31, 0.12)';
+                    ctx.strokeStyle = 'rgba(31, 41, 55, 0.14)';
                     ctx.lineWidth = 1.2;
                     ctx.stroke();
 
-                    ctx.fillStyle = 'rgba(23, 34, 31, 0.92)';
+                    ctx.fillStyle = 'rgba(23, 30, 41, 0.92)';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.font = '700 26px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 26px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.fillText(lane.labelLines[0], badgeX + (badgeWidth / 2), badgeY + (badgeHeight / 2) + 1);
                 });
 
                 if (samples.length === 0) {
-                    ctx.fillStyle = 'rgba(63, 82, 76, 0.74)';
-                    ctx.font = '600 24px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.fillStyle = 'rgba(71, 85, 105, 0.78)';
+                    ctx.font = '600 24px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('Waiting for layered control telemetry.', margin.left + (plotWidth / 2), margin.top + (plotHeight / 2));
@@ -4697,7 +4701,7 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = color;
-                    ctx.font = '700 18px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 18px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(label, margin.left - 14, y);
@@ -4732,9 +4736,9 @@
                     Math.abs(sample.openDrive - sample.closeDrive) < hysteresis
                 );
 
-                drawHorizontalRule(rawLaneIndex, 50, 'rgba(63, 82, 76, 0.34)', 'BIAS', [4, 6]);
-                drawHorizontalRule(driveLaneIndex, threshold, 'rgba(180, 83, 9, 0.72)', `ON ${threshold}`);
-                drawHorizontalRule(driveLaneIndex, this.emgReleaseThreshold, 'rgba(120, 53, 15, 0.44)', `OFF ${this.emgReleaseThreshold}`);
+                drawHorizontalRule(rawLaneIndex, 50, 'rgba(71, 85, 105, 0.44)', 'BIAS', [4, 6]);
+                drawHorizontalRule(driveLaneIndex, threshold, 'rgba(242, 72, 54, 0.7)', `ON ${threshold}`);
+                drawHorizontalRule(driveLaneIndex, this.emgReleaseThreshold, 'rgba(174, 68, 56, 0.5)', `OFF ${this.emgReleaseThreshold}`);
 
                 const driveLaneTop = margin.top + (laneHeight * driveLaneIndex);
                 if (sampleCount > 1) {
@@ -4743,11 +4747,11 @@
                         const x2 = xForIndex(i + 1);
                         let fill = '';
                         if (dualActivationStates[i]) {
-                            fill = 'rgba(180, 83, 9, 0.09)';
+                            fill = 'rgba(217, 119, 6, 0.09)';
                         } else if (displaySamples[i].state === 'open') {
-                            fill = 'rgba(59, 130, 246, 0.07)';
+                            fill = 'rgba(71, 85, 105, 0.08)';
                         } else if (displaySamples[i].state === 'close') {
-                            fill = 'rgba(16, 185, 129, 0.07)';
+                            fill = 'rgba(242, 72, 54, 0.08)';
                         }
 
                         if (fill) {
@@ -4772,41 +4776,41 @@
                                 link_fault: 'FAULT'
                             }[event.type] || event.type.toUpperCase());
 
-                    ctx.strokeStyle = 'rgba(180, 83, 9, 0.34)';
+                    ctx.strokeStyle = 'rgba(174, 68, 56, 0.34)';
                     ctx.lineWidth = 2.2;
                     ctx.beginPath();
                     ctx.moveTo(x, margin.top);
                     ctx.lineTo(x, canvas.height - margin.bottom);
                     ctx.stroke();
 
-                    ctx.font = '700 18px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 18px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     const badgeTextWidth = ctx.measureText(shortLabel).width;
                     const badgeWidth = Math.max(88, Math.ceil(badgeTextWidth + 24));
                     const badgeHeight = 30;
                     const badgeX = x - (badgeWidth / 2);
                     const badgeY = margin.top - 40;
 
-                    ctx.fillStyle = 'rgba(255, 247, 237, 0.98)';
+                    ctx.fillStyle = 'rgba(255, 244, 241, 0.98)';
                     ctx.fillRect(badgeX, badgeY, badgeWidth, badgeHeight);
-                    ctx.strokeStyle = 'rgba(124, 45, 18, 0.58)';
+                    ctx.strokeStyle = 'rgba(174, 68, 56, 0.58)';
                     ctx.lineWidth = 1.8;
                     ctx.strokeRect(badgeX, badgeY, badgeWidth, badgeHeight);
-                    ctx.fillStyle = '#7c2d12';
+                    ctx.fillStyle = '#9f3026';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(shortLabel, x, margin.top - 25);
                 });
 
-                drawSeries(raw1, rawLaneIndex, 'rgba(37, 99, 235, 0.94)', 2.6);
-                drawSeries(raw2, rawLaneIndex, 'rgba(5, 150, 105, 0.94)', 2.6);
-                drawSeries(openDrive, driveLaneIndex, '#3b82f6', 2.4);
-                drawSeries(closeDrive, driveLaneIndex, '#10b981', 2.4);
+                drawSeries(raw1, rawLaneIndex, 'rgba(71, 85, 105, 0.96)', 2.6);
+                drawSeries(raw2, rawLaneIndex, 'rgba(242, 72, 54, 0.9)', 2.6);
+                drawSeries(openDrive, driveLaneIndex, '#475569', 2.4);
+                drawSeries(closeDrive, driveLaneIndex, '#f24836', 2.4);
                 drawSeries(requestedSpeed, speedLaneIndex, '#d97706', 2.8, []);
                 drawSeries(speedCaps, speedLaneIndex, 'rgba(17, 24, 39, 0.98)', 3.4, [12, 8]);
 
                 const rawLegendItems = [
-                    { label: 'EMG1', color: 'rgba(37, 99, 235, 0.9)', dash: [] },
-                    { label: 'EMG2', color: 'rgba(5, 150, 105, 0.9)', dash: [] }
+                    { label: 'EMG1', color: 'rgba(71, 85, 105, 0.9)', dash: [] },
+                    { label: 'EMG2', color: 'rgba(242, 72, 54, 0.9)', dash: [] }
                 ];
                 let rawLegendX = canvas.width - margin.right - 270;
                 const rawLegendY = margin.top + (laneHeight * rawLaneIndex) + 34;
@@ -4821,7 +4825,7 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
-                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 19px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(item.label, rawLegendX + 40, rawLegendY);
@@ -4829,8 +4833,8 @@
                 });
 
                 const driveLegendItems = [
-                    { label: 'OPEN', color: '#3b82f6', dash: [] },
-                    { label: 'CLOSE', color: '#10b981', dash: [] }
+                    { label: 'OPEN', color: '#475569', dash: [] },
+                    { label: 'CLOSE', color: '#f24836', dash: [] }
                 ];
                 let driveLegendX = canvas.width - margin.right - 256;
                 const driveLegendY = margin.top + (laneHeight * driveLaneIndex) + 34;
@@ -4845,7 +4849,7 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
-                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 19px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(item.label, driveLegendX + 40, driveLegendY);
@@ -4869,7 +4873,7 @@
                     ctx.setLineDash([]);
 
                     ctx.fillStyle = 'rgba(23, 34, 31, 0.88)';
-                    ctx.font = '700 19px Aptos, Segoe UI Variable, sans-serif';
+                    ctx.font = '700 19px IBM Plex Sans Condensed, Aptos, Segoe UI Variable, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(item.label, speedLegendX + 40, speedLegendY);
@@ -4908,9 +4912,9 @@
                 // Draw grid
                 this.drawGrid();
 
-                this.drawTouchTrail(this.touchHistory1, ['#6cc4ff', '#1f6feb'], '#7dd3fc');
-                this.drawTouchTrail(this.touchHistory2, ['#ff8f8f', '#d6336c'], '#fca5a5');
-                this.drawTouchTrail(this.touchHistory3, ['#8ce99a', '#2f9e44'], '#b2f2bb');
+                this.drawTouchTrail(this.touchHistory1, ['#cbd5e1', '#64748b'], '#94a3b8');
+                this.drawTouchTrail(this.touchHistory2, ['#fecaca', '#f24836'], '#fca5a5');
+                this.drawTouchTrail(this.touchHistory3, ['#fdba74', '#b45309'], '#fcd34d');
                 this.drawControlTimeline();
             }
 
@@ -5006,6 +5010,7 @@
     </script>
 </body>
 </html>
+
 
 
 
