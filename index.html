@@ -913,8 +913,8 @@
 
         .adaptive-finger-grid {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
         }
 
         .adaptive-finger-card {
@@ -3776,7 +3776,7 @@
                 const modeKey = this.controllerState.modeKey === 'idle' ? 'open-hand' : this.controllerState.modeKey;
                 const mode = this.modeCatalog[this.controllerState.modeKey] || this.modeCatalog.idle;
                 const assist = Math.max(0, Math.min(100, this.tactileState.assist || 0));
-                const contacts = Math.max(0, Math.min(5, this.tactileState.contacts || 0));
+                const contacts = Math.max(0, Math.min(3, this.tactileState.contacts || 0));
                 const available = !!this.tactileState.available;
                 const phaseMap = {
                     inactive: 'Idle',
@@ -3800,19 +3800,17 @@
                     adjusting: 'Force redistribution'
                 };
                 const fingerTemplates = {
-                    'open-hand': { thumb: 0.22, index: 0.22, middle: 0.2, ring: 0.18, little: 0.16 },
-                    'power-grasp': { thumb: 1, index: 0.94, middle: 0.9, ring: 0.82, little: 0.74 },
-                    'key-grasp': { thumb: 1, index: 0.94, middle: 0.36, ring: 0.12, little: 0.08 },
-                    'tripod-grasp': { thumb: 1, index: 0.92, middle: 0.78, ring: 0.14, little: 0.08 },
-                    point: { thumb: 0.36, index: 0.12, middle: 0.22, ring: 0.08, little: 0.06 },
-                    'thumbs-up': { thumb: 1, index: 0.16, middle: 0.1, ring: 0.08, little: 0.06 }
+                    'open-hand': { thumb: 0.22, index: 0.22, middle: 0.2 },
+                    'power-grasp': { thumb: 1, index: 0.94, middle: 0.9 },
+                    'key-grasp': { thumb: 1, index: 0.94, middle: 0.36 },
+                    'tripod-grasp': { thumb: 1, index: 0.92, middle: 0.78 },
+                    point: { thumb: 0.36, index: 0.12, middle: 0.22 },
+                    'thumbs-up': { thumb: 1, index: 0.16, middle: 0.1 }
                 };
                 const fingerOrder = [
                     { key: 'thumb', short: 'TH', name: 'Thumb' },
                     { key: 'index', short: 'IN', name: 'Index' },
-                    { key: 'middle', short: 'MI', name: 'Middle' },
-                    { key: 'ring', short: 'RG', name: 'Ring' },
-                    { key: 'little', short: 'PK', name: 'Pinky' }
+                    { key: 'middle', short: 'MI', name: 'Middle' }
                 ];
                 const template = fingerTemplates[modeKey] || fingerTemplates['open-hand'];
                 const activeKeys = (available && tactileMode !== 'inactive' && contacts > 0)
