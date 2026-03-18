@@ -1713,6 +1713,7 @@
                 this.renderTactileState();
                 this.startAnimation();
                 this.checkWebSerialSupport();
+                this.installLayoutStabilizers();
             }
 
             checkWebSerialSupport() {
@@ -1762,6 +1763,36 @@
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 this.drawGrid();
                 this.updateSessionControls();
+            }
+
+            installLayoutStabilizers() {
+                const scheduleSync = () => {
+                    window.requestAnimationFrame(() => {
+                        window.requestAnimationFrame(() => this.syncLayoutDependentUI());
+                    });
+                };
+
+                window.addEventListener('resize', scheduleSync);
+                window.addEventListener('orientationchange', scheduleSync);
+
+                const brandLogo = document.querySelector('.brand-logo');
+                if (brandLogo && !brandLogo.complete) {
+                    brandLogo.addEventListener('load', scheduleSync, { once: true });
+                }
+
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(scheduleSync).catch(() => {});
+                }
+
+                window.setTimeout(scheduleSync, 60);
+                window.setTimeout(scheduleSync, 220);
+            }
+
+            syncLayoutDependentUI() {
+                this.renderControllerState();
+                this.renderEmgDrive();
+                this.renderTactileState();
+                this.draw();
             }
 
             async connect() {
