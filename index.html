@@ -1662,7 +1662,8 @@
                     'open-hand': 44,
                     'key-grasp': 58,
                     'tripod-grasp': 52,
-                    point: 40
+                    point: 40,
+                    'thumbs-up': 34
                 };
                 this.syntheticRawTick = 0;
                 this.syntheticCarrierMeanAbs = 0.72;
@@ -1691,6 +1692,11 @@
                         name: 'Point',
                         accent: '#7c3aed',
                         summary: 'Index-led pointing posture.'
+                    },
+                    'thumbs-up': {
+                        name: 'Thumbs Up',
+                        accent: '#f24836',
+                        summary: 'Thumb-led approval posture.'
                     }
                 };
 
@@ -3790,7 +3796,8 @@
                     'open-hand': { thumb: 0.34, index: 0.33, middle: 0.33 },
                     'key-grasp': { thumb: 1, index: 0.94, middle: 0.36 },
                     'tripod-grasp': { thumb: 1, index: 0.92, middle: 0.78 },
-                    point: { thumb: 0.36, index: 0.12, middle: 0.22 }
+                    point: { thumb: 0.36, index: 0.12, middle: 0.22 },
+                    'thumbs-up': { thumb: 1, index: 0.16, middle: 0.1 }
                 };
                 const fingerOrder = [
                     { key: 'thumb', short: 'TH', name: 'Thumb' },
@@ -3874,11 +3881,11 @@
             modeKeyFromGesture(name) {
                 const map = {
                     'DOUBLE_TAP': 'point',
-                    'TWO_FINGER_DOUBLE_TAP': 'key-grasp',
+                    'TWO_FINGER_DOUBLE_TAP': 'thumbs-up',
                     'TWO_FINGER_SWIPE': 'tripod-grasp',
                     'TWO_FINGER_PINCH': 'key-grasp',
                     'THREE_FINGER_PINCH': 'tripod-grasp',
-                    'THREE_FINGER_SWIPE': 'tripod-grasp'
+                    'THREE_FINGER_SWIPE': 'thumbs-up'
                 };
 
                 return map[name] || 'idle';
